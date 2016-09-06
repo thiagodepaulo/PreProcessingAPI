@@ -6,10 +6,12 @@
 package com.itera.structures;
 
 import com.itera.preprocess.config.PreProcessingConfig;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -60,7 +62,7 @@ public class Conversor {
             for (int docId : allDocTermFreq.keySet()) {
                 for (int wordId : allDocTermFreq.get(docId).keySet()) {
                     double freq = allDocTermFreq.get(docId).get(wordId);
-                    freq = freq * (Math.log10((double) nDocs / (1 + termDf.get(wordId))));
+                    freq = freq * (1 + (Math.log10((double) nDocs / (1 + termDf.get(wordId)))));
                     allDocTermFreq.get(docId).put(wordId, freq);
                 }
             }
@@ -101,7 +103,7 @@ public class Conversor {
         sb.append(nl);
         sb.append(nl);
         for (int wid = 0; wid < data.getTerms().size(); wid++) {
-            sb.append("@ATTRIBUTE " + data.getTerms().get(wid) + "  REAL" + nl); 
+            sb.append("@ATTRIBUTE " + data.getTermName(wid) + "  REAL" + nl); 
         }
         sb.append("@ATTRIBUTE class  {" + String.join(", ", data.getClasses()) + "}");
         sb.append(nl);
@@ -115,8 +117,8 @@ public class Conversor {
             }
             int classId = data.getClassDocument(docId);
 
-            for (IndexValue iv : data.getAdjListDoc(docId)) {
-                sFreqs[iv.getIndex()] = Double.toString(iv.getValue());
+            for (IndexValue iv : data.getAdjListDoc(docId)) {                
+                sFreqs[iv.getIndex()] = String.format(Locale.US, "%.4f", iv.getValue());
             }
             sb.append(String.join(",", sFreqs) + ", " + data.getClasses().get(classId));
             sb.append(nl);
