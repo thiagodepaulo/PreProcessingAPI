@@ -184,7 +184,7 @@ public class TextRepresentation {
         data.setIDsDocs(ids_docs);
         data.setDocsIDs(docs_ids);
 
-        if (configuration.getDirectoryAsClasses()) {
+        if (configuration.isDirectoryAsClasses()) {
             data.setClasses(allClasses);
             data.setClassesDocuments(classes);
         }
@@ -217,10 +217,10 @@ public class TextRepresentation {
         HashMap<String, String> stemPal = new HashMap<>(); // dicionário do tipo palavra - stem
         ArrayList<File> filesIn = new ArrayList<>();
         StopWords sw = null;
-        if (configuration.getTranslateEN()) {
+        if (configuration.isTranslateEN()) {
             configuration.setLanguage("english");
         }
-        if (configuration.getStopWords()) {
+        if (configuration.isRemoveStopwords()) {
             sw = new StopWords(configuration.getLanguage()); //Objeto para remoção das stopwords dos documentos
         }
 
@@ -242,7 +242,7 @@ public class TextRepresentation {
 
             FeatureList features = new FeatureList();
 
-            features.setFeatures(Preprocessing.FeatureGenerationTM(texto, configuration.getLanguage(), configuration.getStopWords(), configuration.getStem(), stemPal, termDF, sw, cln, stemPt, stemEn, w2v));
+            features.setFeatures(Preprocessing.FeatureGenerationTM(texto, configuration.getLanguage(), configuration.isRemoveStopwords(), configuration.isStemmed(), stemPal, termDF, sw, cln, stemPt, stemEn, w2v));
             terms.add(i, features);
 
             if (!allClasses.contains(classe)) {

@@ -10,6 +10,8 @@ import com.itera.structures.InputPattern;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -18,20 +20,32 @@ import java.util.List;
 public class ContextExpasion {
 
     private static JavaWord2Vec w2v = null;
-    public static String w2vDir = null;
+    public static String w2vDir = "/media/thiagodepaulo/Dados/Thiago/wordEmbedding/wiki2vec/wiki2vec/out";
     public static int numSimilarities = 3;
 
-    public static List<InputPattern> expand(List<InputPattern> data, PreProcessingConfig config) {
-        for(InputPattern input: data) {
-            String[] words = input.getTexto().split("\\W+");
-            ArrayList<String> l = new ArrayList<>();
-            for(String word: words) {
-                w2v.
-            }
+    public static List<InputPattern> expand(List<InputPattern> data) {
+        try {
+            w2v = loadW2V();
+        } catch (IOException ex) {
+            Logger.getLogger(ContextExpasion.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex.getMessage());
+            return data;
         }
+        List<InputPattern> lInputPattern = new ArrayList<>();
+        for (InputPattern input : data) {
+            String[] words = input.getTexto().split("\\W+");
+            List<Pair<String, float[]>> l = w2v.mostSimilar(words);
+            List<String> appended = new ArrayList<>(numSimilarities);
+            for (Pair<String, float[]> p : l) {
+                appended.add(p._1);
+            }
+            lInputPattern.add(new InputPattern(input.getId(),
+                    input.getTexto() + " " + String.join(" ", appended), input.getClasse()));
+        }
+        return data;
     }
 
-    private JavaWord2Vec loadW2V() throws IOException {
+    private static JavaWord2Vec loadW2V() throws IOException {
         if (w2v == null) {
             w2v = JavaWord2Vec.load(w2vDir);
         }

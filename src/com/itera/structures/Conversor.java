@@ -40,7 +40,7 @@ public class Conversor {
                 } else {
                     wid = wordIds.size();
                     wordIds.put(word, wid);
-                }
+                }                
                 if (docTermf.containsKey(wid)) {
                     docTermf.put(wid, docTermf.get(wid) + 1.);
                 } else {
@@ -89,6 +89,7 @@ public class Conversor {
         data.setIDsTerms(invertHashMap(wordIds));
         data.setTermsIDs(wordIds);
         data.setMapTerms_CompleteTerms(null);
+        
         return data;
     }
 
@@ -99,8 +100,8 @@ public class Conversor {
         sb.append("@RELATION IteraDATA");
         sb.append(nl);
         sb.append(nl);
-        for (String word : data.getTerms()) {
-            sb.append("@ATTRIBUTE " + word + "  REAL" + nl);
+        for (int wid = 0; wid < data.getTerms().size(); wid++) {
+            sb.append("@ATTRIBUTE " + data.getTerms().get(wid) + "  REAL" + nl); 
         }
         sb.append("@ATTRIBUTE class  {" + String.join(", ", data.getClasses()) + "}");
         sb.append(nl);

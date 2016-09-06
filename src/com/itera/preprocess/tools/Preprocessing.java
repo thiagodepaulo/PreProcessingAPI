@@ -7,6 +7,7 @@
 package com.itera.preprocess.tools;
 
 import com.itera.preprocess.config.PreProcessingConfig;
+import com.itera.preprocess.contextexpansion.ContextExpasion;
 import com.itera.preprocess.stempt.Stemmer;
 import com.itera.structures.Data;
 import com.itera.structures.InputPattern;
@@ -15,7 +16,6 @@ import com.itera.preprocess.contextexpansion.JavaWord2Vec;
 import com.itera.preprocess.contextexpansion.Pair;
 import com.itera.preprocess.stempt.OrengoStemmer;
 import com.itera.structures.Conversor;
-import com.sun.javafx.scene.control.skin.VirtualFlow;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
 public class Preprocessing {
 
@@ -461,13 +460,21 @@ public class Preprocessing {
     public static void main(String args[]) {
         List<InputPattern> lInput = new ArrayList<>();
         lInput.add(new InputPattern(0, "oi, como vai você?", "a"));
-        lInput.add(new InputPattern(1, "oi, oi oi oi", "b"));        
+        lInput.add(new InputPattern(1, "oi, caminhão carro motor oi oi", "b"));        
+        lInput.add(new InputPattern(2, "caminhão caminhão motor motor oi oi", "b"));        
+        
         PreProcessingConfig config = new PreProcessingConfig(PreProcessingConfig.Language.PORTUGUESE.toString(), true, 1, true, true, true, true, true);
+        
         List<InputPattern> l = Preprocessing.preprocess(lInput, config);
+        
         System.out.println(l);
-        Data data = Conversor.listInputPatternToData(l, config);
-        System.out.println(data.getClasses());
-        System.out.println(Conversor.dataToArff(data));
+        //l = ContextExpasion.expand(l);
+        //System.out.println(l);
+        Data data = Conversor.listInputPatternToData(l, config);       
+        System.out.println(data.getTerms());
+        System.out.println(data);
+        String s = Conversor.dataToArff(data);
+        System.out.println(s);
     }
 
 }

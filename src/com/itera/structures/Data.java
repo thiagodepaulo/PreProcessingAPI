@@ -200,4 +200,7 @@ public class Data implements Serializable{
         this.ids_terms = ids_terms;
     }
     
+    public String toString() {
+        return documents.toString();
+    }
 }
