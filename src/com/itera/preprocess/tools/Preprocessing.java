@@ -8,13 +8,12 @@ package com.itera.preprocess.tools;
 
 import com.itera.preprocess.config.PreProcessingConfig;
 import com.itera.preprocess.contextexpansion.ContextExpasion;
-import com.itera.preprocess.stempt.Stemmer;
 import com.itera.structures.Data;
 import com.itera.structures.InputPattern;
 import com.itera.structures.TermFreq;
 import com.itera.preprocess.contextexpansion.JavaWord2Vec;
 import com.itera.preprocess.contextexpansion.Pair;
-import com.itera.preprocess.stempt.OrengoStemmer;
+import com.itera.preprocess.stempt.Stemmer;
 import com.itera.structures.Conversor;
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,6 +24,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Preprocessing {
 
@@ -61,8 +62,7 @@ public class Preprocessing {
             while ((line = txtFile.readLine()) != null) {
                 txt.append(line + " ");
             } // Leitura do fileuivo texto e armazenamento na variável txt
-            txtFile.close();
-
+            txtFile.close();            
             atributos = FeatureGenerationTM(txt.toString(), lang, remStopWords, stemming, stemTerm, termDF, sw, cln, stemPt, stemEn, w2v);
 
         } catch (Exception e) {
@@ -183,7 +183,7 @@ public class Preprocessing {
             String key = termArray[i].toString();
             atributos.add(new TermFreq(key, hashTermFreq.get(key)));
         }
-
+        
         return atributos;
     }
 
@@ -402,7 +402,12 @@ public class Preprocessing {
 
     public static List<InputPattern> preprocess(List<InputPattern> lInput, PreProcessingConfig config) {
         Cleaner cln = new Cleaner();
-        Stemmer stemPt = new OrengoStemmer(); //Objeto para a radicalização em português
+        ptstemmer.Stemmer stemPt = null;
+        try {
+            stemPt = new ptstemmer.implementations.OrengoStemmer();
+        } catch (ptstemmer.exceptions.PTStemmerException ex) {
+            Logger.getLogger(Preprocessing.class.getName()).log(Level.SEVERE, null, ex);
+        }
         StopWords sw = new StopWords(config.getLanguage()); //Objeto para remoção das stopwords dos documentos        
         InputPattern[] newInputArray = new InputPattern[lInput.size()];
         String[][] vetsWords = new String[lInput.size()][];
@@ -411,6 +416,10 @@ public class Preprocessing {
         for (InputPattern input : lInput) {
             String[] words = input.getTexto().split("\\W+");
             for (int i = 0; i < words.length; i++) {
+                if (words[i].length() <= config.getWordLenghtMin()) {
+                    words[i] = null;
+                    continue;
+                }
                 if (config.isCleaning()) {
                     words[i] = cln.clean(words[i]);
                 }
@@ -422,7 +431,7 @@ public class Preprocessing {
                 }
                 if (config.isStemmed()) {
                     if (config.getLanguage().equalsIgnoreCase(PreProcessingConfig.Language.PORTUGUESE.toString())) {
-                        words[i] = stemPt.wordStemming(words[i]);
+                        words[i] = stemPt.getWordStem(words[i]);
                     } else if (config.getLanguage().equalsIgnoreCase(PreProcessingConfig.Language.ENGLISH.toString())) {
                         words[i] = StemmerEn.get(words[i]);
                     }
@@ -460,20 +469,20 @@ public class Preprocessing {
     public static void main(String args[]) {
         List<InputPattern> lInput = new ArrayList<>();
         lInput.add(new InputPattern(0, "oi, como vai você?", "a"));
-        lInput.add(new InputPattern(1, "oi, caminhão carro motor oi oi", "b"));        
-        lInput.add(new InputPattern(2, "caminhão caminhão motor motor oi oi", "b"));        
-        
+        lInput.add(new InputPattern(1, "oi, caminhão carro motor oi oi", "b"));
+        lInput.add(new InputPattern(2, "caminhão caminhão motor motor oi oi", "b"));
+
         PreProcessingConfig config = new PreProcessingConfig(PreProcessingConfig.Language.PORTUGUESE.toString(), true, 1, true, true, true, true, true);
-        
+
         List<InputPattern> l = Preprocessing.preprocess(lInput, config);
-        
+
         System.out.println(l);
-        //l = ContextExpasion.expand(l);
-        //System.out.println(l);
-        Data data = Conversor.listInputPatternToData(l, config);       
+        l = ContextExpasion.expand(l);
+        System.out.println(l);
+        Data data = Conversor.listInputPatternToData(l, config);
         System.out.println(data.getTerms());
         System.out.println(data);
-        String s = Conversor.dataToArff(data);
+        String s = Conversor.dataToStrArff(data);
         System.out.println(s);
     }
 

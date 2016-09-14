@@ -5,17 +5,17 @@
 // Description: Class to generate a document-term matrix in ARFF format.
 //              (http://www.cs.waikato.ac.nz/ml/weka/arff.html)
 //*****************************************************************************
-package com.itera.preprocess.tools; 
+package com.itera.preprocess.tools;
 
 import com.itera.preprocess.config.PreProcessingConfig;
 import com.itera.io.ListFiles;
-import com.itera.preprocess.stempt.OrengoStemmer;
-import com.itera.preprocess.stempt.Stemmer;
 import com.itera.structures.Data;
 import com.itera.structures.FeatureList;
 import com.itera.structures.IndexValue;
 import com.itera.structures.InputPattern;
 import com.itera.preprocess.contextexpansion.JavaWord2Vec;
+import com.itera.preprocess.stempt.OrengoStemmer;
+import com.itera.preprocess.stempt.Stemmer;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -190,7 +190,6 @@ public class TextRepresentation {
         }
 
         System.out.println("Textos pré-processados");
-
         return data;
     }
 
@@ -225,14 +224,13 @@ public class TextRepresentation {
         }
 
         Cleaner cln = new Cleaner();
-        Stemmer stemPt = new OrengoStemmer(); //Objeto para a radicalização em português
+        Stemmer stemPt = new OrengoStemmer(); //Objeto para a radicalização em português        
         StemmerEn stemEn = new StemmerEn(); //Objeto para a radicalização em inglês
-
 
         int interval = 10;
         System.out.print("- 0% ");
         int nextInterval = interval;
-        
+
         int i = 0;
         for (InputPattern dado : dados) {
             System.out.print(".");
@@ -267,13 +265,13 @@ public class TextRepresentation {
         stemPt = null;
         stemEn = null;
 
-        if (configuration.getDFMin() > 0) {
+        if (configuration.getDfMin() > 0) {
             names = new ArrayList<>();
             Set<String> featureName = termDF.keySet();
             Iterator it = featureName.iterator();
             while (it.hasNext()) {
                 String key = (String) it.next();
-                if (termDF.get(key) >= configuration.getDFMin()) {
+                if (termDF.get(key) >= configuration.getDfMin()) {
                     names.add(key);
                 }
             }
@@ -308,7 +306,7 @@ public class TextRepresentation {
             FeatureList termsFreq = terms.get(doc);
 
             ArrayList<IndexValue> indexValues = new ArrayList<>();
-            if (configuration.getTFIDF()) {
+            if (configuration.isTfidf()) {
                 for (int term = 0; term < terms.get(doc).getFeatures().size(); term++) {
                     String termName = terms.get(doc).getFeature(term).getFeature();
                     double freq = terms.get(doc).getFeature(term).getFrequency();
@@ -342,7 +340,7 @@ public class TextRepresentation {
         data.setIDsDocs(ids_docs);
         data.setDocsIDs(docs_ids);
 
-        if (configuration.getDirectoryAsClasses()) {
+        if (configuration.isDirectoryAsClasses()) {
             data.setClasses(allClasses);
             data.setClassesDocuments(classes);
         }
@@ -351,7 +349,7 @@ public class TextRepresentation {
 
         return data;
     }
-    
+
     public static Data RepresentNLP(String dirIn, PreProcessingConfig configuration) {
 
         System.out.println("Pré-processando Textos...");
@@ -365,12 +363,12 @@ public class TextRepresentation {
         HashMap<String, String> stemPal = new HashMap<String, String>(); // dicionário do tipo palavra - stem
         ArrayList<File> filesIn = new ArrayList<File>();
         StopWords sw = null;
-        if (configuration.getStopWords()) {
+        if (configuration.isRemoveStopwords()) {
             sw = new StopWords(configuration.getLanguage()); //Objeto para remoção das stopwords dos documentos
         }
 
         Cleaner cln = new Cleaner();
-        Stemmer stemPt = new OrengoStemmer(); //Objeto para a radicalização em português
+        Stemmer stemPt = stemPt = new OrengoStemmer(); //Objeto para a radicalização em português
         StemmerEn stemEn = new StemmerEn(); //Objeto para a radicalização em inglês
         ListFiles.List(new File(dirIn), filesIn); //Vetor para armazenar os documentos textuais
 
@@ -385,9 +383,9 @@ public class TextRepresentation {
             System.out.print(".");
             File fileIn = (File) orderedFiles[i];
             FeatureList features = new FeatureList();
-            features.setFeatures(Preprocessing.FeatureGenerationNLP(fileIn, configuration.getLanguage(), configuration.getStopWords(), configuration.getStem(), stemPal, termDF, sw, cln, stemPt, stemEn, configuration.getTranslateEN()));
+            features.setFeatures(Preprocessing.FeatureGenerationNLP(fileIn, configuration.getLanguage(), configuration.isRemoveStopwords(), configuration.isStemmed(), stemPal, termDF, sw, cln, stemPt, stemEn, configuration.isTranslateEN()));
             terms.add(i, features);
-            if (configuration.getDirectoryAsClasses()) {
+            if (configuration.isDirectoryAsClasses()) {
                 String classe = filesIn.get(i).getAbsolutePath();
                 classe = classe.replace("\\", "/");
                 classe = classe.substring(0, classe.lastIndexOf("/"));
@@ -415,13 +413,13 @@ public class TextRepresentation {
         stemPt = null;
         stemEn = null;
 
-        if (configuration.getDFMin() > 0) {
+        if (configuration.getDfMin() > 0) {
             names = new ArrayList<String>();
             Set<String> featureName = termDF.keySet();
             Iterator it = featureName.iterator();
             while (it.hasNext()) {
                 String key = (String) it.next();
-                if (termDF.get(key) >= configuration.getDFMin()) {
+                if (termDF.get(key) >= configuration.getDfMin()) {
                     names.add(key);
                 }
             }
@@ -456,7 +454,7 @@ public class TextRepresentation {
             FeatureList termsFreq = terms.get(doc);
 
             ArrayList<IndexValue> indexValues = new ArrayList<IndexValue>();
-            if (configuration.getTFIDF()) {
+            if (configuration.isTfidf()) {
                 for (int term = 0; term < terms.get(doc).getFeatures().size(); term++) {
                     String termName = terms.get(doc).getFeature(term).getFeature();
                     double freq = terms.get(doc).getFeature(term).getFrequency();
@@ -479,7 +477,7 @@ public class TextRepresentation {
 
             data.addAdjListDoc(indexValues);
 
-            if (configuration.getDirectoryAsClasses()) {
+            if (configuration.isDirectoryAsClasses()) {
                 String classe = arquivo.substring(0, arquivo.lastIndexOf("/"));
                 classe = classe.substring(classe.lastIndexOf("/") + 1, classe.length());
                 if (!classe.equals("UNLABELED")) {
@@ -493,7 +491,7 @@ public class TextRepresentation {
         data.setIDsDocs(ids_docs);
         data.setDocsIDs(docs_ids);
 
-        if (configuration.getDirectoryAsClasses()) {
+        if (configuration.isDirectoryAsClasses()) {
             data.setClasses(allClasses);
             data.setClassesDocuments(classes);
         }

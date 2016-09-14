@@ -21,26 +21,27 @@ public class PreProcessingConfig implements Serializable {
     private boolean removeStopwords;
     private boolean translateEN;
     private boolean doCleaning;
-    
-    public enum Language { 
-        
+    private int wordLenghtMin = 2;
+
+    public enum Language {
+
         PORTUGUESE("portuguese"), ENGLISH("english");
-        
+
         private final String selectedLanguage;
-        
+
         private Language(String lang) {
             this.selectedLanguage = lang;
         }
-        
+
         @Override
         public String toString() {
             return this.selectedLanguage;
         }
-    
+
     };
 
     /**
-     * 
+     *
      * @param language
      * @param doStemming
      * @param dfMin
@@ -48,7 +49,7 @@ public class PreProcessingConfig implements Serializable {
      * @param directoryAsClasses
      * @param removeStopwords
      * @param translateEN
-     * @param doCleaning 
+     * @param doCleaning
      */
     public PreProcessingConfig(String language, boolean doStemming, int dfMin, boolean calcTfidf, boolean directoryAsClasses, boolean removeStopwords, boolean translateEN, boolean doCleaning) {
         this.language = language;
@@ -63,6 +64,14 @@ public class PreProcessingConfig implements Serializable {
 
     public PreProcessingConfig createDefaultPreProcessingConfig() {
         return null;
+    }
+
+    public int getWordLenghtMin() {
+        return wordLenghtMin;
+    }
+
+    public void setWordLenghtMin(int wordLenghtMin) {
+        this.wordLenghtMin = wordLenghtMin;
     }
 
     public String getLanguage() {

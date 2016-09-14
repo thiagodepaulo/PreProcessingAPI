@@ -4,36 +4,40 @@
 // Last-Modified: January 29, 2015
 // Description: 
 //*****************************************************************************  
-
 package com.itera.structures;
 
 public class TermFreq {
+
     private String term;
     private Integer frequency;
-    
-    public TermFreq(){
+
+    public TermFreq() {
         setTerm("");
         setFrequency(0);
     }
-    
-    public TermFreq(String term, Integer freq){
+
+    public TermFreq(String term, Integer freq) {
         setTerm(term);
         setFrequency(freq);
     }
-    
-    public void setTerm(String term){
+
+    public void setTerm(String term) {
         this.term = term;
     }
-    
-    public void setFrequency(int frequency){
+
+    public void setFrequency(int frequency) {
         this.frequency = frequency;
     }
-    
-    public String getFeature(){
+
+    public String getFeature() {
         return term;
     }
-    
-    public Integer getFrequency(){
+
+    public Integer getFrequency() {
         return frequency;
+    }
+
+    public String toString() {
+        return "(" + this.term + ":" + this.frequency + ")";
     }
 }

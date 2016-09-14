@@ -6,13 +6,26 @@
 package com.itera.structures;
 
 import com.itera.preprocess.config.PreProcessingConfig;
-import java.text.DecimalFormat;
+import com.itera.util.Tools;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
 
 /**
  *
@@ -42,7 +55,7 @@ public class Conversor {
                 } else {
                     wid = wordIds.size();
                     wordIds.put(word, wid);
-                }                
+                }
                 if (docTermf.containsKey(wid)) {
                     docTermf.put(wid, docTermf.get(wid) + 1.);
                 } else {
@@ -87,54 +100,129 @@ public class Conversor {
         }
         data.setDocsIDs(docsIds);
         data.setDocuments(new ArrayList<>(Arrays.asList(documents)));
-        data.setIDsDocs(invertHashMap(docsIds));
-        data.setIDsTerms(invertHashMap(wordIds));
+        data.setIDsDocs(Tools.invertHashMap(docsIds));
+        data.setIDsTerms(Tools.invertHashMap(wordIds));
         data.setTermsIDs(wordIds);
         data.setMapTerms_CompleteTerms(null);
-        
+
         return data;
     }
 
-    public static String dataToArff(Data data) {
+    public static Data arffToData(String arffArqName) {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(arffArqName));
+            Instances arff = new Instances(reader);
+            reader.close();
+
+            if (arff.classIndex() < 0) {
+                arff.setClassIndex(arff.numAttributes() - 1);
+            }
+
+            int numAttr = arff.numAttributes();
+            int numCls = arff.numClasses();
+            int numInsts = arff.numInstances();
+            int clsIdx = arff.classIndex();
+
+            Data data = new Data();
+            ArrayList<String> classes = new ArrayList<>(numCls);
+            for (int i = 0; i < numCls; i++) {
+                classes.add(i, null);
+            }
+            HashMap<Integer, Integer> classesDocuments = new HashMap<>();
+            HashMap<String, Integer> docsIDs = new HashMap<>();
+            ArrayList<ArrayList<IndexValue>> documents = new ArrayList<>();
+            HashMap<String, Integer> terms_ids = new HashMap<>();
+
+            for (int i = 0; i < numAttr; i++) {
+                if (i != arff.classIndex()) {
+                    terms_ids.put(arff.attribute(i).name(), i);
+                }
+            }
+            for (int idx = 0; idx < numInsts; idx++) {
+                Instance inst = arff.get(idx);
+                int clsPos = (int) (inst.classValue());
+                String classStr = inst.toString(clsIdx);
+                if (!classes.contains(classStr)) {
+                    classes.set(clsPos, classStr);
+                }
+                ArrayList<IndexValue> doc = new ArrayList<>();
+                docsIDs.put("" + idx, idx);                
+                classesDocuments.put(idx, clsPos);                
+                for (int attrIdx = 0; attrIdx < numAttr; attrIdx++) {
+                    if (attrIdx != arff.classIndex()) {
+                        double val = inst.value(attrIdx);
+                        if (val > 0.0001) {
+                            IndexValue iv = new IndexValue(attrIdx, val);
+                            doc.add(iv);
+                        }
+                    }
+                }
+                documents.add(doc);
+            }
+
+            data.setClasses(classes);
+            data.setClassesDocuments(classesDocuments);
+            data.setDocsIDs(docsIDs);
+            data.setIDsDocs(Tools.invertHashMap(docsIDs));
+            data.setDocuments(documents);
+            data.setTermsIDs(terms_ids);
+            data.setIDsTerms(Tools.invertHashMap(terms_ids));
+
+            return data;
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Conversor.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Conversor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public static void main(String[] args) {
+        Data data = Conversor.arffToData("/home/thiagodepaulo/teste_jurídico.arff");
+        System.out.println(data.getTerms());
+    }
+
+    public static Instances dataToArff(Data data) throws IOException {
+        Instances instances = new Instances(new StringReader(dataToStrArff(data)));
+        instances.setClassIndex(instances.numAttributes() - 1);
+        return instances;
+    }
+
+    public static String dataToStrArff(Data data) {
         StringBuilder sb = new StringBuilder();
         String nl = "\n";
+        int classIdx = data.getNumTerms();
 
         sb.append("@RELATION IteraDATA");
         sb.append(nl);
         sb.append(nl);
         for (int wid = 0; wid < data.getTerms().size(); wid++) {
-            sb.append("@ATTRIBUTE " + data.getTermName(wid) + "  REAL" + nl); 
+            sb.append("@ATTRIBUTE " + data.getTermName(wid) + "  REAL" + nl);
         }
-        sb.append("@ATTRIBUTE class  {" + String.join(", ", data.getClasses()) + "}");
+        sb.append("@ATTRIBUTE class_  {" + String.join(", ", data.getClasses()) + "}");
         sb.append(nl);
         sb.append(nl);
         sb.append(nl);
         sb.append("@DATA\n");
         for (int docId = 0; docId < data.getNumDocs(); docId++) {
-            String[] sFreqs = new String[data.getNumTerms()];
-            for (int wid = 0; wid < data.getNumTerms(); wid++) {
-                sFreqs[wid] = "0";
-            }
+            
             int classId = data.getClassDocument(docId);
+            sb.append("{");
 
-            for (IndexValue iv : data.getAdjListDoc(docId)) {                
-                sFreqs[iv.getIndex()] = String.format(Locale.US, "%.4f", iv.getValue());
+            // Sorting
+            Collections.sort(data.getAdjListDoc(docId), new Comparator<IndexValue>() {
+                @Override
+                public int compare(IndexValue iv1, IndexValue iv2) {
+                    return Integer.compare(iv1.getIndex(), iv2.getIndex());
+                }
+            });
+            for (IndexValue iv : data.getAdjListDoc(docId)) {
+                sb.append(iv.getIndex() + " " + String.format(Locale.US, "%.4f", iv.getValue()) + ", ");
             }
-            sb.append(String.join(",", sFreqs) + ", " + data.getClasses().get(classId));
+            sb.append(classIdx + " " + data.getClasses().get(classId) + "}");
             sb.append(nl);
         }
         return sb.toString();
     }
 
-    public static <T, P> HashMap<P, T> invertHashMap(HashMap<T, P> map) {
-        HashMap<P, T> invMap = new HashMap<>();
-        for (Map.Entry<T, P> entry : map.entrySet()) {
-            invMap.put(entry.getValue(), entry.getKey());
-        }
-        return invMap;
-    }
-
-    public static void main(String[] args) {
-
-    }
 }

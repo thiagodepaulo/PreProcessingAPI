@@ -21,17 +21,19 @@ public class ContextExpasion {
 
     private static JavaWord2Vec w2v = null;
     public static String w2vDir = "/media/thiagodepaulo/Dados/Thiago/wordEmbedding/wiki2vec/wiki2vec/out";
-    public static int numSimilarities = 3;
+    public static int numSimilarities = 10;
 
     public static List<InputPattern> expand(List<InputPattern> data) {
         try {
-            w2v = loadW2V();
+            w2v = loadW2V();            
         } catch (IOException ex) {
             Logger.getLogger(ContextExpasion.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println(ex.getMessage());
             return data;
         }
-        List<InputPattern> lInputPattern = new ArrayList<>();
+        // number of similarities words
+        w2v.topN = numSimilarities;
+        List<InputPattern> newData = new ArrayList<>();
         for (InputPattern input : data) {
             String[] words = input.getTexto().split("\\W+");
             List<Pair<String, float[]>> l = w2v.mostSimilar(words);
@@ -39,10 +41,10 @@ public class ContextExpasion {
             for (Pair<String, float[]> p : l) {
                 appended.add(p._1);
             }
-            lInputPattern.add(new InputPattern(input.getId(),
+            newData.add(new InputPattern(input.getId(),
                     input.getTexto() + " " + String.join(" ", appended), input.getClasse()));
         }
-        return data;
+        return newData;
     }
 
     private static JavaWord2Vec loadW2V() throws IOException {

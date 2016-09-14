@@ -22,6 +22,7 @@ public class StopWords {
     public StopWords(String language){
         
         String locationStopFile = StopWords.class.getProtectionDomain().getCodeSource().getLocation().toString();
+        System.out.println(locationStopFile);
         locationStopFile = locationStopFile.replace("\\", "/");
         locationStopFile = locationStopFile.substring(5, locationStopFile.lastIndexOf("/"));
         

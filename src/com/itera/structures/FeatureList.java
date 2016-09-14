@@ -27,4 +27,9 @@ public class FeatureList {
     public TermFreq getFeature(int pos){
         return features.get(pos);
     }
+    
+    @Override
+    public String toString() {
+        return features.toString();
+    }
 }

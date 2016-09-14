@@ -27,6 +27,7 @@ public class Cleaner implements Serializable {
     /** Recebe uma String qualquer e retorna uma String apenas com caracteres permitidos  */
     public String clean(String str){
         String allowed="aáâàãâbcçdeéêfghiíjklmnoóôõpqrstuúüvwxyz_";
+        //String allowed="abcdefghijklmnopqrstuvwxyz";
         StringBuilder new_str= new StringBuilder("");
         str=str.toLowerCase();
 
