@@ -9,6 +9,8 @@ import com.itera.util.Tools;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
+import weka.core.UnassignedClassException;
 
 /**
  *
@@ -37,7 +39,19 @@ public class Data implements Serializable {
         setClasses(new ArrayList<String>());
         setDocsIDs(new HashMap<String, Integer>());
         setIDsDocs(new HashMap<Integer, String>());
-        setClassesDocuments(new HashMap<>());
+        setClassesDocuments(new HashMap<Integer, Integer>());
+    }
+
+    public int[] getNumDocsPerClasses() {
+        int[] classCounter = new int[this.getNumClasses()];
+        for (int docId : this.classesDocuments.keySet()) {
+            classCounter[this.classesDocuments.get(docId)]++;
+        }
+        return classCounter;
+    }
+
+    public Set<Integer> getDocsIds() {
+        return this.ids_docs.keySet();
     }
 
     public Integer getNumDocs() {
@@ -371,9 +385,9 @@ public class Data implements Serializable {
         data.ids_terms = new HashMap<>(this.ids_terms);
         data.terms_ids = new HashMap<>(this.terms_ids);
 
-        int lastDocId = data.documents.size();        
+        int lastDocId = data.documents.size();
         for (int i = inic; i < inic + end; i++) {
-            data.documents.add(lastDocId, this.documents.get(i));            
+            data.documents.add(lastDocId, this.documents.get(i));
             data.classesDocuments.put(lastDocId, this.classesDocuments.get(i));
             data.ids_docs.put(lastDocId, this.ids_docs.get(i));
             data.docs_ids.put(this.ids_docs.get(i), lastDocId);

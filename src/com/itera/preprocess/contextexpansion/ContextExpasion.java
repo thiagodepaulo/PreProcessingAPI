@@ -5,7 +5,6 @@
  */
 package com.itera.preprocess.contextexpansion;
 
-import com.itera.preprocess.config.PreProcessingConfig;
 import com.itera.structures.InputPattern;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ public class ContextExpasion {
         w2v.topN = numSimilarities;
         List<InputPattern> newData = new ArrayList<>();
         for (InputPattern input : data) {
-            String[] words = input.getTexto().split("\\W+");
+            String[] words = input.getTexto().split("\\s+");
             List<Pair<String, float[]>> l = w2v.mostSimilar(words);
             List<String> appended = new ArrayList<>(numSimilarities);
             for (Pair<String, float[]> p : l) {

@@ -45,7 +45,7 @@ public class Conversor {
                 classesIds.put(input.getClasse(), classesIds.size());
             }
             classesDocs.put(input.getId(), classesIds.get(input.getClasse()));
-            String[] words = input.getTexto().split("\\W+");
+            String[] words = input.getTexto().split("\\s+");
             HashMap<Integer, Double> docTermf = new HashMap<>();
             for (String word : words) {
                 // freq by document

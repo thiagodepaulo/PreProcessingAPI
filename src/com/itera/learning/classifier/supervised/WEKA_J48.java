@@ -10,11 +10,8 @@ import com.itera.structures.Conversor;
 import com.itera.structures.Data;
 import com.itera.structures.IndexValue;
 import com.itera.structures.InputPattern;
-import java.util.ArrayList;
 import java.util.List;
-import static javax.management.Query.attr;
 import weka.classifiers.trees.J48;
-import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
@@ -51,7 +48,7 @@ public class WEKA_J48 extends TextClassifier {
     }
     
     @Override
-    public int classifyInstance(ArrayList<IndexValue> instance) throws Exception {
+    public int classifyInstance(List<IndexValue> instance) throws Exception {
         Instance inst = new SparseInstance(this.terms_ids.size());
         for (IndexValue iv : instance) {
             inst.setValueSparse(iv.getIndex(), iv.getValue());
@@ -61,7 +58,7 @@ public class WEKA_J48 extends TextClassifier {
     }
     
     @Override
-    public double[] distributionForInstance(ArrayList<IndexValue> instance) throws Exception {                
+    public double[] distributionForInstance(List<IndexValue> instance) throws Exception {                
         Instance inst = new SparseInstance(this.terms_ids.size());
         for (IndexValue iv : instance) {
             inst.setValueSparse(iv.getIndex(), iv.getValue());

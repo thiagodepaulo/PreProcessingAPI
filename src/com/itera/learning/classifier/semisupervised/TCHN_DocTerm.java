@@ -10,6 +10,7 @@ import com.itera.structures.Data;
 import com.itera.structures.IndexValue;
 import com.itera.structures.InputPattern;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -294,12 +295,12 @@ public class TCHN_DocTerm extends TextClassifier {
     }
 
     @Override
-    public int classifyInstance(ArrayList<IndexValue> instance) throws Exception {
+    public int classifyInstance(List<IndexValue> instance) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public double[] distributionForInstance(ArrayList<IndexValue> instance) throws Exception {
+    public double[] distributionForInstance(List<IndexValue> instance) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

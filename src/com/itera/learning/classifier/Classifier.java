@@ -8,7 +8,7 @@ package com.itera.learning.classifier;
 import com.itera.structures.Data;
 import com.itera.structures.IndexValue;
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Classifier interface. All schemes for numeric or nominal prediction in
@@ -43,7 +43,7 @@ public interface Classifier extends Serializable {
    * Utils.missingValue() if no prediction is made
    * @exception Exception if an error occurred during the prediction
    */
-  public int classifyInstance(ArrayList<IndexValue> instance) throws Exception;
+  public int classifyInstance(List<IndexValue> instance) throws Exception;
 
   /**
    * Predicts the class memberships for a given instance. If
@@ -60,6 +60,6 @@ public interface Classifier extends Serializable {
    * @exception Exception if distribution could not be
    * computed successfully
    */
-  public double[] distributionForInstance(ArrayList<IndexValue> instance) throws Exception;
+  public double[] distributionForInstance(List<IndexValue> instance) throws Exception;
 
 }

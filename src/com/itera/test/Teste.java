@@ -5,6 +5,7 @@
  */
 package com.itera.test;
 
+import com.itera.learning.classifier.TextClassifier;
 import com.itera.learning.classifier.supervised.WekaClassifier;
 import com.itera.learning.evaluator.Evaluator;
 import com.itera.structures.Conversor;
@@ -19,8 +20,10 @@ public class Teste {
 
     public static void main(String args[]) throws Exception {
         String arffArqName = "/home/thiagodepaulo/teste_jurídico.arff";
-        Data data = Conversor.arffToData(arffArqName);        
-        WekaClassifier wcls = new WekaClassifier(new J48(), "", data);                
+        Data data = Conversor.arffToData(arffArqName);                
+        //TextClassifier wcls = new WekaClassifier(new J48(), "", data);                
+        TextClassifier wcls = new WekaClassifier(new J48(), "", data);
+        
         Evaluator[] evals = Evaluator.crossValidateModel(wcls, data, 10);
     }
 

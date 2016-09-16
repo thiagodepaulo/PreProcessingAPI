@@ -11,7 +11,7 @@ import com.itera.structures.InputPattern;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
- 
+
 /**
  *
  * @author root
@@ -29,6 +29,8 @@ public abstract class TextClassifier implements Classifier {
     protected String learningType;
 
     protected List<String> outputType;
+    
+    private final String splitPattern = "\\s+";
 
     public TextClassifier(Data data, String learningType) {
         this.classes = data.getClasses();
@@ -83,9 +85,43 @@ public abstract class TextClassifier implements Classifier {
     public double getFTerm(int idTerm, int idClass) {
         return this.fTerms[idTerm][idClass];
     }
-    
-  public abstract int classifyInstance(InputPattern textInstance) throws Exception;
 
-  public abstract double[] distributionForInstance(InputPattern textInstance) throws Exception;
+    public String getClassName(int classId) {
+        return this.classes.get(classId);
+    }
+
+    public ArrayList<String> getClasses() {
+        return this.classes;
+    }
+
+    public List<IndexValue> inputPatternToListIndexValue(InputPattern input) { 
+        System.out.println(input);
+        String[] words = input.getTexto().split(this.splitPattern);
+        int wid;
+        List<IndexValue> linput = new ArrayList<>();
+        HashMap<Integer, Double> map = new HashMap<>();        
+        for (String w : words) {                        
+            w = w.trim();
+            if (terms_ids.containsKey(w)) {
+                System.out.println(w);
+                wid = terms_ids.get(w);
+                System.out.println(w);
+                if (map.containsKey(wid)) {
+                    map.put(wid, map.get(wid) + 1.);
+                } else {
+                    map.put(wid, 1.);
+                }
+            }
+        }
+        for(int wwid: map.keySet()) {
+            linput.add(new IndexValue(wwid, map.get(wwid)));
+        }
+        System.out.println(linput);
+        return linput;
+    }
+
+    public abstract int classifyInstance(InputPattern textInstance) throws Exception;
+
+    public abstract double[] distributionForInstance(InputPattern textInstance) throws Exception;
 
 }

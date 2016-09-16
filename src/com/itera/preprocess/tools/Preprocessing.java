@@ -414,7 +414,7 @@ public class Preprocessing {
         HashMap<String, Integer> termDf = new HashMap<>();
         int pos = 0;
         for (InputPattern input : lInput) {
-            String[] words = input.getTexto().split("\\W+");
+            String[] words = input.getTexto().split("\\s+");
             for (int i = 0; i < words.length; i++) {
                 if (words[i].length() <= config.getWordLenghtMin()) {
                     words[i] = null;

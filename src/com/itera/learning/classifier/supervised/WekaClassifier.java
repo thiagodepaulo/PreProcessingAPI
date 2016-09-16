@@ -11,6 +11,7 @@ import com.itera.structures.Data;
 import com.itera.structures.IndexValue;
 import com.itera.structures.InputPattern;
 import java.util.ArrayList;
+import java.util.List;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -27,30 +28,33 @@ public class WekaClassifier extends TextClassifier {
     private Instances instances;
 
     public WekaClassifier(AbstractClassifier wekaClassifier, String option, Data data) throws Exception {
-        super(data, "Weka supervised");
+        super(data, "supervised");
         this.wekaClassifier = wekaClassifier;
         this.wekaClassifier.setOptions(Utils.splitOptions(option));
     }
 
-    private Instance indexValueToInstance(ArrayList<IndexValue> input) {
-        Instance inst = new SparseInstance(this.terms_ids.size());        
-        inst.setDataset(this.instances);        
-        for (int i=0; i< this.terms_ids.size() ; i++)
+    private Instance indexValueToInstance(List<IndexValue> input) {
+        Instance inst = new SparseInstance(this.terms_ids.size());
+        inst.setDataset(this.instances);
+        for (int i = 0; i < this.terms_ids.size(); i++) {
             inst.setValue(i, 0);
+        }
         for (IndexValue iv : input) {
-            inst.setValue(iv.getIndex(), iv.getValue());            
-        }        
+            inst.setValue(iv.getIndex(), iv.getValue());
+        }
         return inst;
     }
 
     @Override
     public int classifyInstance(InputPattern textInstance) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        List<IndexValue> linput = inputPatternToListIndexValue(textInstance);
+        return classifyInstance(linput);
     }
 
     @Override
     public double[] distributionForInstance(InputPattern textInstance) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        List<IndexValue> linput = inputPatternToListIndexValue(textInstance);
+        return distributionForInstance(linput);
     }
 
     @Override
@@ -60,13 +64,13 @@ public class WekaClassifier extends TextClassifier {
     }
 
     @Override
-    public int classifyInstance(ArrayList<IndexValue> input) throws Exception {
+    public int classifyInstance(List<IndexValue> input) throws Exception {
         Instance instance = indexValueToInstance(input);
         return (int) this.wekaClassifier.classifyInstance(instance);
     }
 
     @Override
-    public double[] distributionForInstance(ArrayList<IndexValue> input) throws Exception {
+    public double[] distributionForInstance(List<IndexValue> input) throws Exception {
         Instance instance = indexValueToInstance(input);
         return this.wekaClassifier.distributionForInstance(instance);
     }
