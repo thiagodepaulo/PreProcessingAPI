@@ -41,6 +41,30 @@ public class Tools {
         return idx_max;
     }
 
+    public static int argmax(int[] a) {
+        int max = a[0];
+        int idx_max = 0;
+        for (int i = 1; i < a.length; i++) {
+            if (a[i] > max) {
+                max = a[i];
+                idx_max = i;
+            }
+        }
+        return idx_max;
+    }
+
+    public static double[] normalize(double[] a) {
+        double sum = 0;
+        double[] r = new double[a.length];
+        for (double ai : a) {
+            sum += ai;
+        }
+        for (int i = 0; i < a.length; i++) {
+            r[i] = a[i] / sum;
+        }
+        return r;
+    }
+
     public static String readFile(File file) {
         ArrayList<TermFreq> atributos = new ArrayList<>();
 

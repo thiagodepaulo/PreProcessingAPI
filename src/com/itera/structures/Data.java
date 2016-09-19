@@ -30,6 +30,14 @@ public class Data implements Serializable {
 
     private ArrayList<ArrayList<IndexValue>> documents;
     private HashMap<Integer, Integer> classesDocuments;
+    
+    public Data newCopy() {
+        Data data = new Data();
+        data.terms_ids = this.terms_ids;
+        data.ids_terms = this.ids_terms;
+        data.classes = this.classes;
+        return data;
+    }
 
     public Data() {
         setIDsTerms(new HashMap<Integer, String>());
@@ -394,4 +402,6 @@ public class Data implements Serializable {
             lastDocId++;
         }
     }
+    
+    
 }
