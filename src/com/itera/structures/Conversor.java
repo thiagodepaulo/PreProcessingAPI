@@ -204,6 +204,7 @@ public class Conversor {
         sb.append(nl);
         sb.append(nl);
         sb.append("@DATA\n");
+        
         for (int docId = 0; docId < data.getNumDocs(); docId++) {
             
             int classId = data.getClassDocument(docId);

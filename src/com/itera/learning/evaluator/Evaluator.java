@@ -60,13 +60,13 @@ public class Evaluator {
 
         // Do the folds
         for (int i = 0; i < numFolds; i++) {
+            System.out.println("cross-validation "+i);
             Evaluator eval = new Evaluator();            
             Data train = data.trainCV(numFolds, i);
             classifier.buildClassifier(train);
             Data test = data.testCV(numFolds, i);
             eval.evaluateClassifier(classifier, test);
-            evals[i] = eval;
-            System.out.println(eval.toSummaryString());
+            evals[i] = eval;            
         }
         return evals;
     }

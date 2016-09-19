@@ -10,7 +10,8 @@ import com.itera.structures.Data;
 import com.itera.structures.IndexValue;
 import com.itera.structures.InputPattern;
 import com.itera.util.Tools;
-import java.util.ArrayList;
+import com.itera.util.VectorOps;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import weka.classifiers.trees.J48;
@@ -20,54 +21,59 @@ import weka.classifiers.trees.J48;
  * @author root
  */
 public class BalancedEnsembleClassifier extends TextClassifier {
-    
+
     private int nSamples = 100;
     private int nDocsPerClass = 50;
     private TextClassifier[] classifiers;
-    
+
     public BalancedEnsembleClassifier(Data data, int nSamples, int nDocsPerClass) {
         super(data, "supervised");
         this.nSamples = nSamples;
         this.nDocsPerClass = nDocsPerClass;
         this.classifiers = new TextClassifier[nSamples];
     }
-    
+
     @Override
     public int classifyInstance(InputPattern textInstance) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
     @Override
     public double[] distributionForInstance(InputPattern textInstance) throws Exception {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
     @Override
     public void buildClassifier(Data data) throws Exception {
         Data[] vetData = randomSplitData(data);
         for (int i = 0; i < this.nSamples; i++) {
-            this.classifiers[i] = new WekaClassifier(new J48(), learningType, vetData[i]);
+            this.classifiers[i] = new WekaClassifier(new J48(), "-C 0.25 -M 2", vetData[i]);
             this.classifiers[i].buildClassifier(vetData[i]);
         }
     }
-    
+
     @Override
     public int classifyInstance(List<IndexValue> instance) throws Exception {
         int[] votes = new int[this.classes.size()];
-        for(int i=0; i<this.nSamples; i++) {
+        for (int i = 0; i < this.nSamples; i++) {
             int classId = this.classifiers[i].classifyInstance(instance);
             votes[classId]++;
         }
-        return Tools.argmax(votes);
+        return VectorOps.argmax(votes);
     }
-    
+
     @Override
     public double[] distributionForInstance(List<IndexValue> instance) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        double[] dist = new double[this.classes.size()];
+        for (int i = 0; i < this.nSamples; i++) {
+            double[] r = this.classifiers[i].distributionForInstance(instance);
+            VectorOps.add(dist, r);
+        }
+        return VectorOps.normalize(dist);
     }
-    
+
     private int[][] dataClassDocs(Data data) {
-        
+
         int numClass = data.getNumClasses();
         int[][] dataClassDocs = new int[numClass][];
         int[] numDocsPerClass = data.getNumDocsPerClasses();
@@ -84,23 +90,32 @@ public class BalancedEnsembleClassifier extends TextClassifier {
         }
         return dataClassDocs;
     }
-    
+
     public Data[] randomSplitData(Data data) {
         Random r = new Random(System.currentTimeMillis());
         int[][] dataClassDocs = this.dataClassDocs(data);
         Data[] vetData = new Data[this.nSamples];
         for (int i = 0; i < this.nSamples; i++) {
-            vetData[i] = data.newCopy();            
+            vetData[i] = data.newCopy();
+            int newDocId;
+            HashMap<Integer, String> ids_doc = new HashMap<>();
             for (int c = 0; c < data.getNumClasses(); c++) {
+                int nDocsPerClass = dataClassDocs[c].length;
+                if (nDocsPerClass <= 0) {
+                    continue;
+                }
                 for (int j = 0; j < this.nDocsPerClass; j++) {
-                    int pos = r.nextInt(dataClassDocs[c].length);
+                    int pos = r.nextInt(nDocsPerClass);
                     int docId = dataClassDocs[c][pos];
                     int classId = data.getClassDocument(docId);
-                    vetData[i].addAdjListDoc(data.getAdjListDoc(docId));
-                    vetData[i].addClassDocument(docId, classId);
+                    newDocId = vetData[i].addAdjListDoc(data.getAdjListDoc(docId));
+                    vetData[i].addClassDocument(newDocId, classId);
+                    ids_doc.put(newDocId, "" + docId);
+                    vetData[i].setIDsDocs(ids_doc);
+                    vetData[i].setDocsIDs(Tools.invertHashMap(ids_doc));
                 }
             }
         }
         return vetData;
-    }    
+    }
 }

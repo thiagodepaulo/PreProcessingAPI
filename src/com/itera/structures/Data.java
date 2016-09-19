@@ -183,8 +183,10 @@ public class Data implements Serializable {
         return terms_ids.get(termName);
     }
 
-    public void addAdjListDoc(ArrayList<IndexValue> adjList) {
-        documents.add(adjList);
+    public int addAdjListDoc(ArrayList<IndexValue> adjList) {
+        int newPos = documents.size();
+        documents.add(newPos, adjList);
+        return newPos;
     }
 
     public void addClassDocument(int idDoc, int classDoc) {
