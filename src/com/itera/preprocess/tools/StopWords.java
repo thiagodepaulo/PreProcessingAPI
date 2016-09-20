@@ -12,9 +12,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
+import java.io.Serializable;
 import java.util.HashSet;
 
-public class StopWords {
+public class StopWords implements Serializable {
     static HashSet<String> list = new HashSet<String>();
     
     
