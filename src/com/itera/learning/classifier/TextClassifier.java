@@ -94,18 +94,15 @@ public abstract class TextClassifier implements Classifier {
         return this.classes;
     }
 
-    public List<IndexValue> inputPatternToListIndexValue(InputPattern input) { 
-        System.out.println(input);
+    public List<IndexValue> inputPatternToListIndexValue(InputPattern input) {         
         String[] words = input.getTexto().split(this.splitPattern);
         int wid;
         List<IndexValue> linput = new ArrayList<>();
         HashMap<Integer, Double> map = new HashMap<>();        
         for (String w : words) {                        
             w = w.trim();
-            if (terms_ids.containsKey(w)) {
-                System.out.println(w);
-                wid = terms_ids.get(w);
-                System.out.println(w);
+            if (terms_ids.containsKey(w)) {                
+                wid = terms_ids.get(w);                
                 if (map.containsKey(wid)) {
                     map.put(wid, map.get(wid) + 1.);
                 } else {
@@ -115,8 +112,7 @@ public abstract class TextClassifier implements Classifier {
         }
         for(int wwid: map.keySet()) {
             linput.add(new IndexValue(wwid, map.get(wwid)));
-        }
-        System.out.println(linput);
+        }        
         return linput;
     }
 

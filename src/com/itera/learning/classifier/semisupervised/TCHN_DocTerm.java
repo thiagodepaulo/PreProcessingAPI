@@ -9,6 +9,7 @@ import com.itera.learning.classifier.TextClassifier;
 import com.itera.structures.Data;
 import com.itera.structures.IndexValue;
 import com.itera.structures.InputPattern;
+import com.itera.util.VectorOps;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,10 +27,14 @@ public class TCHN_DocTerm extends TextClassifier {
     private double errorCorrectionRate; // Error correction error
     private int maxNumberGlobalIterations; // Maximum Number of Global Iterations
     private int maxNumberLocalIterations; // Maximum Number of Local Iterations
-    private double minError; // Minimum Mean Squared Error
+    private double minError; // Minimum Mean Squared Error    
 
-    public TCHN_DocTerm(Data data, String learningType) {
-        super(data, learningType);
+    public TCHN_DocTerm(Data data, double errorCorrectionRate, double minError, int maxNumGlobalIterations, int maxNumLocalIterations) {
+        super(data, "semi-supervised");
+        setErrorCorrectionRate(errorCorrectionRate);
+        setMinError(minError);
+        setMaxNumberGlobalIterations(maxNumGlobalIterations);
+        setMaxNumberLocalIterations(maxNumLocalIterations);
     }
 
     @Override
@@ -181,11 +186,6 @@ public class TCHN_DocTerm extends TextClassifier {
         }
     }
 
-    @Override
-    public double[] distributionForInstance(InputPattern instance) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     public void setMaxNumberGlobalIterations(int maxNumberGlobalIterations) {
         this.maxNumberGlobalIterations = maxNumberGlobalIterations;
     }
@@ -290,18 +290,23 @@ public class TCHN_DocTerm extends TextClassifier {
     }
 
     @Override
+    public double[] distributionForInstance(InputPattern instance) throws Exception {
+        return this.distributionForInstance(super.inputPatternToListIndexValue(instance));
+    }
+
+    @Override
     public int classifyInstance(InputPattern textInstance) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return classifyInstance(super.inputPatternToListIndexValue(textInstance));
     }
 
     @Override
     public int classifyInstance(List<IndexValue> instance) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return VectorOps.argmax(this.distributionForInstance(instance));
     }
 
     @Override
     public double[] distributionForInstance(List<IndexValue> instance) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.classifyInstanceReal((ArrayList<IndexValue>) instance);
     }
 
 }
