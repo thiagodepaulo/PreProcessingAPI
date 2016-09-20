@@ -95,7 +95,8 @@ public class SerializedPreprocessing implements Serializable {
         PreProcessingConfig config = new PreProcessingConfig("portuguese", true, 0, true, true, true, false, true);
         SerializedPreprocessing sp = new SerializedPreprocessing(config);
         
-        InputPattern input = new InputPattern(0, "Oi, como vai você, tudo bem? CAdê a Manifestação?", "");
+        InputPattern input = new InputPattern(0, "Oi, como vai você, tudo bem? CAdê a Manifestação?", "");        
+        
         sp.preprocess(input);
         
         System.out.println(input);
