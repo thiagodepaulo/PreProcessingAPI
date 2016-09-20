@@ -6,12 +6,11 @@
 package com.itera.preprocess.tools;
 
 import com.itera.preprocess.config.PreProcessingConfig;
+import com.itera.preprocess.stempt.OrengoStemmer;
+import com.itera.preprocess.stempt.Stemmer;
 import com.itera.structures.InputPattern;
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import ptstemmer.exceptions.PTStemmerException;
 
 /**
  *
@@ -20,28 +19,29 @@ import ptstemmer.exceptions.PTStemmerException;
 public class SerializedPreprocessing implements Serializable {
 
     private final Cleaner cln;
-    private final ptstemmer.Stemmer stemPt;
+    private final Stemmer stemPt;
     private final StopWords sw;
     private final PreProcessingConfig config;
     private static final String BLANK = " ";
 
-    public SerializedPreprocessing(PreProcessingConfig config) throws PTStemmerException {
+    public SerializedPreprocessing(PreProcessingConfig config) {
         this.cln = new Cleaner();
         this.sw = new StopWords(config.getLanguage()); //Objeto para remoção das stopwords dos documentos                        
-        this.stemPt = new ptstemmer.implementations.OrengoStemmer();
+        this.stemPt = new OrengoStemmer();
         this.config = config;
     }
 
     public void preprocess(InputPattern input) {
 
-        String[] words = input.getTexto().split("\\s+");
+        String txt = input.getTexto();
+        if (this.config.isCleaning()) {
+            txt = cln.clean(txt);
+        }
+        String[] words = txt.trim().split("\\s+");        
         for (int i = 0; i < words.length; i++) {
             if (words[i].length() <= this.config.getWordLenghtMin()) {
                 words[i] = null;
                 continue;
-            }
-            if (this.config.isCleaning()) {
-                words[i] = cln.clean(words[i]);
             }
             if (this.config.isRemoveStopwords()) {
                 if (sw.isStopWord(words[i])) {
@@ -51,7 +51,7 @@ public class SerializedPreprocessing implements Serializable {
             }
             if (this.config.isStemmed()) {
                 if (this.config.getLanguage().equalsIgnoreCase(PreProcessingConfig.Language.PORTUGUESE.toString())) {
-                    words[i] = stemPt.getWordStem(words[i]);
+                    words[i] = stemPt.wordStemming(words[i]);
                 } else if (this.config.getLanguage().equalsIgnoreCase(PreProcessingConfig.Language.ENGLISH.toString())) {
                     words[i] = StemmerEn.get(words[i]);
                 }
@@ -88,7 +88,7 @@ public class SerializedPreprocessing implements Serializable {
         input.setTexto(sb.toString());
     }
 
-    public static void main(String args[]) throws PTStemmerException {
+    public static void main(String args[]) {
         PreProcessingConfig config = new PreProcessingConfig("portuguese", true, 0, true, true, true, false, true);
         SerializedPreprocessing sp = new SerializedPreprocessing(config);
 
