@@ -26,22 +26,30 @@ public class WekaClassifier extends TextClassifier {
 
     private final AbstractClassifier wekaClassifier;
     private Instances instances;
+    // it is used to replace missing values by zero
+    private final double[] zeros;
+    private String option;
 
     public WekaClassifier(AbstractClassifier wekaClassifier, String option, Data data) throws Exception {
         super(data, "supervised");
         this.wekaClassifier = wekaClassifier;
         this.wekaClassifier.setOptions(Utils.splitOptions(option));
+        this.zeros = new double[data.getNumTerms() + 1];
+        this.option = option;
     }
 
+    public String getOption() {
+        return this.option;
+    }    
+
     private Instance indexValueToInstance(List<IndexValue> input) {
-        Instance inst = new SparseInstance(this.terms_ids.size());
+        // sparse instance. +1 by class index
+        Instance inst = new SparseInstance(this.terms_ids.size() + 1);
         inst.setDataset(this.instances);
-        for (int i = 0; i < this.terms_ids.size(); i++) {
-            inst.setValue(i, 0);
-        }
         for (IndexValue iv : input) {
             inst.setValue(iv.getIndex(), iv.getValue());
         }
+        inst.replaceMissingValues(zeros);
         return inst;
     }
 

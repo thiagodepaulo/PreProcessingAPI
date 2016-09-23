@@ -62,7 +62,7 @@ public class Preprocessing {
             while ((line = txtFile.readLine()) != null) {
                 txt.append(line + " ");
             } // Leitura do fileuivo texto e armazenamento na variável txt
-            txtFile.close();            
+            txtFile.close();
             atributos = FeatureGenerationTM(txt.toString(), lang, remStopWords, stemming, stemTerm, termDF, sw, cln, stemPt, stemEn, w2v);
 
         } catch (Exception e) {
@@ -183,7 +183,7 @@ public class Preprocessing {
             String key = termArray[i].toString();
             atributos.add(new TermFreq(key, hashTermFreq.get(key)));
         }
-        
+
         return atributos;
     }
 
@@ -414,14 +414,15 @@ public class Preprocessing {
         HashMap<String, Integer> termDf = new HashMap<>();
         int pos = 0;
         for (InputPattern input : lInput) {
-            String[] words = input.getTexto().split("\\s+");
+            String txt = input.getTexto();
+            if (config.isCleaning()) {
+                txt = cln.clean(txt);
+            }
+            String[] words = txt.trim().split("\\s+");
             for (int i = 0; i < words.length; i++) {
                 if (words[i].length() <= config.getWordLenghtMin()) {
                     words[i] = null;
                     continue;
-                }
-                if (config.isCleaning()) {
-                    words[i] = cln.clean(words[i]);
                 }
                 if (config.isRemoveStopwords()) {
                     if (sw.isStopWord(words[i])) {
@@ -468,7 +469,7 @@ public class Preprocessing {
 
     public static void main(String args[]) {
         List<InputPattern> lInput = new ArrayList<>();
-        lInput.add(new InputPattern(0, "oi, como vai você?", "a"));
+        lInput.add(new InputPattern(0, "oi, como vai você? 77788888", "a"));
         lInput.add(new InputPattern(1, "oi, caminhão carro motor oi oi", "b"));
         lInput.add(new InputPattern(2, "caminhão caminhão motor motor oi oi", "b"));
 

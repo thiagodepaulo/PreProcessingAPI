@@ -307,6 +307,12 @@ public class Data implements Serializable {
         ids_docs.put(id2, name1);
         this.documents.set(id1, doc2);
         this.documents.set(id2, doc1);
+        
+        // update classes
+        int cls1 = this.classesDocuments.get(id1);
+        int cls2 = this.classesDocuments.get(id2);
+        this.classesDocuments.put(id1, cls2);
+        this.classesDocuments.put(id2, cls1);
     }
 
     /**

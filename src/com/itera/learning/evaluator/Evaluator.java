@@ -24,51 +24,52 @@ public class Evaluator {
     public int withClass;
     public String[] classNames;
 
-    public void evaluateClassifier(Classifier model, Data testData) throws Exception {
-        this.nClass = testData.getNumClasses();
-        this.nDocs = testData.getNumDocs();
-
+    public Evaluator(Data data) {
+        this.nClass = data.getNumClasses();
+        this.incorrect = 0;
+        this.correct = 0;
+        this.withClass = 0;
+        this.nDocs = data.getNumDocs();
+        this.confusionMatrix = new double[this.nClass][this.nClass];
         classNames = new String[nClass];
         for (int i = 0; i < nClass; i++) {
-            classNames[i] = testData.getClasses().get(i);
-        }
-
-        ArrayList<IndexValue> adjList;
-        confusionMatrix = new double[nClass][nClass];
-        for (int docId = 0; docId < nDocs; docId++) {
-            adjList = testData.getAdjListDoc(docId);
-            int realClassDoc = testData.getClassDocument(docId);            
-            int predClassDoc = model.classifyInstance(adjList);
-            confusionMatrix[realClassDoc][predClassDoc] += 1;
-
-            if (realClassDoc != predClassDoc) {
-                incorrect++;
-            } else {
-                correct++;
-            }
-            withClass += 1;
+            classNames[i] = data.getClasses().get(i);
         }
     }
 
-    public static Evaluator[] crossValidateModel(Classifier classifier, Data data, int numFolds)
-            throws Exception {
+    public void evaluateClassifier(Classifier model, Data testData) throws Exception {
 
+        ArrayList<IndexValue> adjList;
+
+        for (int docId : testData.getDocsIds()) {
+            adjList = testData.getAdjListDoc(docId);
+            int realClassDoc = testData.getClassDocument(docId);
+            int predClassDoc = model.classifyInstance(adjList);
+            this.confusionMatrix[realClassDoc][predClassDoc] += 1;
+
+            if (realClassDoc != predClassDoc) {
+                this.incorrect++;
+            } else {
+                this.correct++;
+            }
+            this.withClass += 1;
+        }
+    }
+
+    public void crossValidateModel(Classifier classifier, Data data, int numFolds)
+            throws Exception {
         // Make a copy of the data we can reorder
         //data.randomize(random);
         data.stratify(numFolds);
-        Evaluator[] evals = new Evaluator[numFolds];
-
         // Do the folds
+        
         for (int i = 0; i < numFolds; i++) {
-            System.out.println("cross-validation "+i);
-            Evaluator eval = new Evaluator();            
+            System.out.println("cross-validation " + i);
             Data train = data.trainCV(numFolds, i);
             classifier.buildClassifier(train);
             Data test = data.testCV(numFolds, i);
-            eval.evaluateClassifier(classifier, test);
-            evals[i] = eval;            
+            this.evaluateClassifier(classifier, test);
         }
-        return evals;
     }
 
     /**
@@ -90,7 +91,7 @@ public class Evaluator {
      * @return the percent of correctly classified instances (between 0 and 100)
      */
     public final double pctCorrect() {
-        return 100 * correct / withClass;
+        return 100 * correct / (double)withClass;
     }
 
     /**
@@ -112,7 +113,7 @@ public class Evaluator {
      * 100)
      */
     public final double pctIncorrect() {
-        return 100 * incorrect / withClass;
+        return 100 * incorrect / (double) withClass;
     }
 
     public double truePositiveRate(int classIndex) {
@@ -471,9 +472,9 @@ public class Evaluator {
      */
     public String toSummaryString() {
 
-        StringBuffer text = new StringBuffer();
+        StringBuilder text = new StringBuilder();
 
-        text.append(toMatrixString("ConfusionMatrix"));
+        //text.append(toMatrixString("ConfusionMatrix"));
         text.append("\nSummary" + "\n");
         text.append("Correctly Classified Instances     ");
         text.append(correct() + "     " + pctCorrect() + " %\n");

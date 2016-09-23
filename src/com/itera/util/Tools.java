@@ -10,10 +10,16 @@ import com.itera.structures.TermFreq;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -28,6 +34,31 @@ public class Tools {
         }
         return invMap;
     }
+    
+    public static boolean saveFile(String fileName, String content) {
+        try {
+            PrintWriter pw = new PrintWriter(fileName);
+            pw.print(content);
+            pw.close();
+            return true;
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Tools.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+    }
+    
+    public static String join(String sep, Iterable<String> collection) {
+        StringBuilder sb = new StringBuilder();
+        Iterator<String> itrStr = collection.iterator();
+        if(itrStr.hasNext()) {
+            sb.append(itrStr.next());
+            while(itrStr.hasNext()) {
+                sb.append(sep);
+                sb.append(itrStr.next());
+            }
+        }
+        return sb.toString();
+    }       
 
     public static String readFile(File file) {
         ArrayList<TermFreq> atributos = new ArrayList<>();

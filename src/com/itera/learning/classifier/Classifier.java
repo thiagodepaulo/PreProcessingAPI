@@ -61,5 +61,6 @@ public interface Classifier extends Serializable {
    * computed successfully
    */
   public double[] distributionForInstance(List<IndexValue> instance) throws Exception;
+  
 
 }

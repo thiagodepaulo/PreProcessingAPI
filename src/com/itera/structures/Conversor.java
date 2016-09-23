@@ -26,6 +26,8 @@ import java.util.logging.Logger;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
+import static com.itera.util.Tools.join;
+import weka.core.SparseInstance;
 
 /**
  *
@@ -45,9 +47,12 @@ public class Conversor {
                 classesIds.put(input.getClasse(), classesIds.size());
             }
             classesDocs.put(input.getId(), classesIds.get(input.getClasse()));
-            String[] words = input.getTexto().split("\\s+");
+            String[] words = input.getTexto().trim().split("\\s+");
             HashMap<Integer, Double> docTermf = new HashMap<>();
             for (String word : words) {
+                if (word.length() <= config.getWordLenghtMin()) {
+                    continue;
+                }
                 // freq by document
                 int wid = -1;
                 if (wordIds.containsKey(word)) {
@@ -146,8 +151,8 @@ public class Conversor {
                     classes.set(clsPos, classStr);
                 }
                 ArrayList<IndexValue> doc = new ArrayList<>();
-                docsIDs.put("" + idx, idx);                
-                classesDocuments.put(idx, clsPos);                
+                docsIDs.put("" + idx, idx);
+                classesDocuments.put(idx, clsPos);
                 for (int attrIdx = 0; attrIdx < numAttr; attrIdx++) {
                     if (attrIdx != arff.classIndex()) {
                         double val = inst.value(attrIdx);
@@ -178,39 +183,71 @@ public class Conversor {
     }
 
     public static void main(String[] args) {
-        Data data = Conversor.arffToData("/home/thiagodepaulo/teste_jurídico.arff");
-        System.out.println(data.getTerms());
+        String s = "     oi, como  vai  você? aêó-fala      ";
+        for (String ss : s.trim().split("\\s+")) {
+            System.out.println(ss.length());
+            System.out.println(ss);
+        }
     }
 
     public static Instances dataToArff(Data data) throws IOException {
-        Instances instances = new Instances(new StringReader(dataToStrArff(data)));
-        instances.setClassIndex(instances.numAttributes() - 1);
+        int numDocs = data.getNumDocs();
+        int numTerms = data.getNumTerms();
+        
+        //creating attributes
+        ArrayList<Attribute> attrs = new ArrayList<>();        
+        for(String word: data.getTerms()) {
+            attrs.add(new Attribute(word));            
+        }        
+        attrs.add(new Attribute("class_attr", data.getClasses()));
+        //creating instances
+        Instances instances = new Instances("Itera_Data", attrs, numDocs);        
+        instances.setClassIndex(numTerms);
+        int docId = 0;
+        double[] zeros = new double[numTerms + 1];
+        for(ArrayList<IndexValue> l: data.getAdjListDocs()) {
+            SparseInstance inst = new SparseInstance(numTerms + 1);            
+            for(IndexValue iv: l) {
+                inst.setValue(iv.getIndex(), iv.getValue());
+            }            
+            // set class value
+            inst.setValue(numTerms, data.getClassDocument(docId++));
+            inst.replaceMissingValues(zeros);
+            instances.add(inst);
+        }
+        
         return instances;
     }
 
     public static String dataToStrArff(Data data) {
         StringBuilder sb = new StringBuilder();
-        String nl = "\n";
+        String nl = "\n", blank = " ", open = "{", close = "}", comma = ", ";
+        String attr = "@ATTRIBUTE", real = "REAL";
         int classIdx = data.getNumTerms();
 
         sb.append("@RELATION IteraDATA");
         sb.append(nl);
         sb.append(nl);
         for (int wid = 0; wid < data.getTerms().size(); wid++) {
-            sb.append("@ATTRIBUTE " + data.getTermName(wid) + "  REAL" + nl);
+            sb.append(attr);
+            sb.append(blank);
+            sb.append(data.getTermName(wid));
+            sb.append(blank);
+            sb.append(real);
+            sb.append(nl);
         }
-        sb.append("@ATTRIBUTE class_  {" + String.join(", ", data.getClasses()) + "}");
+        sb.append("@ATTRIBUTE class_  {" + join(", ", data.getClasses()) + "}");
         sb.append(nl);
         sb.append(nl);
         sb.append(nl);
         sb.append("@DATA\n");
-        
-        for (int docId = 0; docId < data.getNumDocs(); docId++) {
-            
-            int classId = data.getClassDocument(docId);
-            sb.append("{");
 
-            // Sorting
+        for (int docId : data.getDocsIds()) {
+
+            int classId = data.getClassDocument(docId);
+            sb.append(open);
+
+            // Sorting by index
             Collections.sort(data.getAdjListDoc(docId), new Comparator<IndexValue>() {
                 @Override
                 public int compare(IndexValue iv1, IndexValue iv2) {
@@ -218,9 +255,15 @@ public class Conversor {
                 }
             });
             for (IndexValue iv : data.getAdjListDoc(docId)) {
-                sb.append(iv.getIndex() + " " + String.format(Locale.US, "%.4f", iv.getValue()) + ", ");
+                sb.append(iv.getIndex());
+                sb.append(blank);
+                sb.append(String.format(Locale.US, "%.4f", iv.getValue()));
+                sb.append(comma);
             }
-            sb.append(classIdx + " " + data.getClasses().get(classId) + "}");
+            sb.append(classIdx);
+            sb.append(blank);
+            sb.append(data.getClasses().get(classId));
+            sb.append(close);
             sb.append(nl);
         }
         return sb.toString();
