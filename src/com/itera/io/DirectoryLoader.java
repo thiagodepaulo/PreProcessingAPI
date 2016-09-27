@@ -49,7 +49,12 @@ public class DirectoryLoader implements Loader {
         for (File file : files) {
             if (file.isDirectory()) {
                 String name = file.getName();
-                String className = name.replace(" ", "-");
+                String className = null;
+                if (name.equalsIgnoreCase("unlabeled")) {
+                     className = InputPattern.UNLABELED;
+                } else {
+                    className = name.replace(" ", "-");
+                }
                 File subdir = new File(directoryPath + File.separator + name);
                 String[] subfiles = subdir.list();
                 for (String subfile : subfiles) {

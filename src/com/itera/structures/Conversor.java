@@ -43,10 +43,12 @@ public class Conversor {
         HashMap<Integer, HashMap<Integer, Double>> allDocTermFreq = new HashMap<>();
         int nDocs = lInput.size();
         for (InputPattern input : lInput) {
-            if (!classesIds.containsKey(input.getClasse())) {
-                classesIds.put(input.getClasse(), classesIds.size());
+            if (!input.getClasse().equals(InputPattern.UNLABELED)) {
+                if (!classesIds.containsKey(input.getClasse())) {
+                    classesIds.put(input.getClasse(), classesIds.size());
+                }
+                classesDocs.put(input.getId(), classesIds.get(input.getClasse()));
             }
-            classesDocs.put(input.getId(), classesIds.get(input.getClasse()));
             String[] words = input.getTexto().trim().split("\\s+");
             HashMap<Integer, Double> docTermf = new HashMap<>();
             for (String word : words) {
@@ -189,8 +191,8 @@ public class Conversor {
             System.out.println(ss);
         }
     }
-    
-    public static Instances dataToArff2(Data data) {        
+
+    public static Instances dataToArff2(Data data) {
         Instances inst = null;
         try {
             inst = new Instances(new StringReader(dataToStrArff(data)));
@@ -204,29 +206,29 @@ public class Conversor {
     public static Instances dataToArff(Data data) throws IOException {
         int numDocs = data.getNumDocs();
         int numTerms = data.getNumTerms();
-        
+
         //creating attributes
-        ArrayList<Attribute> attrs = new ArrayList<>();                
-        for(String word: data.getTerms()) {
-            attrs.add(new Attribute(word));            
-        }        
+        ArrayList<Attribute> attrs = new ArrayList<>();
+        for (String word : data.getTerms()) {
+            attrs.add(new Attribute(word));
+        }
         attrs.add(new Attribute("class_attr", data.getClasses()));
         //creating instances
-        Instances instances = new Instances("Itera_Data", attrs, numDocs);        
+        Instances instances = new Instances("Itera_Data", attrs, numDocs);
         instances.setClassIndex(numTerms);
         int docId = 0;
         double[] zeros = new double[numTerms + 1];
-        for(ArrayList<IndexValue> l: data.getAdjListDocs()) {
-            SparseInstance inst = new SparseInstance(numTerms + 1);            
-            for(IndexValue iv: l) {                
+        for (ArrayList<IndexValue> l : data.getAdjListDocs()) {
+            SparseInstance inst = new SparseInstance(numTerms + 1);
+            for (IndexValue iv : l) {
                 inst.setValue(attrs.get(iv.getIndex()), iv.getValue());
-            }            
+            }
             // set class value
             inst.setValue(attrs.get(numTerms), data.getClassDocument(docId++));
             inst.replaceMissingValues(zeros);
             instances.add(inst);
         }
-        
+
         return instances;
     }
 

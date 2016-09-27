@@ -7,6 +7,8 @@ public class InputPattern implements Serializable {
     int id;
     String texto;
     String classe;
+    
+    public static final String UNLABELED = "__unlabeled__";
 
     public InputPattern(int id, String texto, String classe) {
         this.id = id;
