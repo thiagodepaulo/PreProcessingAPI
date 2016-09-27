@@ -115,6 +115,10 @@ public abstract class Stemmer implements Serializable {
 			return res;
 		}
 	}
+        
+        public String getWordStem(String word) {
+            return wordStemming(word);
+        }
 
 	protected abstract String stemming(String word);
 }

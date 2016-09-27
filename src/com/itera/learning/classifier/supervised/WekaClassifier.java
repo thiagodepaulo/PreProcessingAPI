@@ -10,7 +10,6 @@ import com.itera.structures.Conversor;
 import com.itera.structures.Data;
 import com.itera.structures.IndexValue;
 import com.itera.structures.InputPattern;
-import java.util.ArrayList;
 import java.util.List;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
@@ -36,6 +35,10 @@ public class WekaClassifier extends TextClassifier {
         this.wekaClassifier.setOptions(Utils.splitOptions(option));
         this.zeros = new double[data.getNumTerms() + 1];
         this.option = option;
+    }
+    
+    public AbstractClassifier getWekaClassifier() {
+        return this.wekaClassifier;
     }
 
     public String getOption() {

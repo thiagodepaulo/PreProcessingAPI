@@ -8,7 +8,9 @@ package com.itera.structures;
 import com.itera.util.Tools;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import weka.core.UnassignedClassException;
 
@@ -125,11 +127,11 @@ public class Data implements Serializable {
     }
 
     public ArrayList<String> getTerms() {
-        ArrayList<String> listTerms = new ArrayList<String>();
-
-        Object[] keys = terms_ids.keySet().toArray();
-        for (int key = 0; key < keys.length; key++) {
-            listTerms.add(keys[key].toString());
+        List<Integer> l = new ArrayList<>(this.ids_terms.keySet());
+        Collections.sort(l);        
+        ArrayList<String> listTerms = new ArrayList<String>();        
+        for (int key: l) {
+            listTerms.add(this.ids_terms.get(key));
         }
         return listTerms;
     }

@@ -13,6 +13,7 @@ import com.itera.structures.InputPattern;
 import com.itera.structures.TermFreq;
 import com.itera.preprocess.contextexpansion.JavaWord2Vec;
 import com.itera.preprocess.contextexpansion.Pair;
+import com.itera.preprocess.stempt.OrengoStemmer;
 import com.itera.preprocess.stempt.Stemmer;
 import com.itera.structures.Conversor;
 import java.io.BufferedReader;
@@ -402,12 +403,8 @@ public class Preprocessing {
 
     public static List<InputPattern> preprocess(List<InputPattern> lInput, PreProcessingConfig config) {
         Cleaner cln = new Cleaner();
-        ptstemmer.Stemmer stemPt = null;
-        try {
-            stemPt = new ptstemmer.implementations.OrengoStemmer();
-        } catch (ptstemmer.exceptions.PTStemmerException ex) {
-            Logger.getLogger(Preprocessing.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        Stemmer stemPt = null;
+        stemPt = new OrengoStemmer();
         StopWords sw = new StopWords(config.getLanguage()); //Objeto para remoção das stopwords dos documentos        
         InputPattern[] newInputArray = new InputPattern[lInput.size()];
         String[][] vetsWords = new String[lInput.size()][];
@@ -469,22 +466,22 @@ public class Preprocessing {
 
     public static void main(String args[]) {
         List<InputPattern> lInput = new ArrayList<>();
-        lInput.add(new InputPattern(0, "oi, como vai você? 77788888", "a"));
+        lInput.add(new InputPattern(0, "oi, como vai você voce gás gas lápede falarão? 77788888", "a"));
         lInput.add(new InputPattern(1, "oi, caminhão carro motor oi oi", "b"));
-        lInput.add(new InputPattern(2, "caminhão caminhão motor motor oi oi", "b"));
+        lInput.add(new InputPattern(2, "caminhão caminhão caminhao motor motor oi oi", "b"));
 
         PreProcessingConfig config = new PreProcessingConfig(PreProcessingConfig.Language.PORTUGUESE.toString(), true, 1, true, true, true, true, true);
 
         List<InputPattern> l = Preprocessing.preprocess(lInput, config);
 
         System.out.println(l);
-        l = ContextExpasion.expand(l);
-        System.out.println(l);
-        Data data = Conversor.listInputPatternToData(l, config);
-        System.out.println(data.getTerms());
-        System.out.println(data);
-        String s = Conversor.dataToStrArff(data);
-        System.out.println(s);
+        //l = ContextExpasion.expand(l);
+        //System.out.println(l);
+        //Data data = Conversor.listInputPatternToData(l, config);
+        //System.out.println(data.getTerms());
+        //System.out.println(data);
+        //String s = Conversor.dataToStrArff(data);
+        //System.out.println(s);
     }
 
 }

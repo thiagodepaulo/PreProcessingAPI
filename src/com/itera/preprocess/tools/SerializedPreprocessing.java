@@ -31,13 +31,11 @@ public class SerializedPreprocessing implements Serializable {
         this.config = config;
     }
 
-    public void preprocess(InputPattern input) {
-
-        String txt = input.getTexto();
+    public String preprocess(String txt) {
         if (this.config.isCleaning()) {
             txt = cln.clean(txt);
         }
-        String[] words = txt.trim().split("\\s+");        
+        String[] words = txt.trim().split("\\s+");
         for (int i = 0; i < words.length; i++) {
             if (words[i].length() <= this.config.getWordLenghtMin()) {
                 words[i] = null;
@@ -85,7 +83,12 @@ public class SerializedPreprocessing implements Serializable {
                 }
             }
         }
-        input.setTexto(sb.toString());
+        return sb.toString();
+    }
+
+    public void preprocess(InputPattern input) {
+        String txt = input.getTexto();
+        input.setTexto(preprocess(txt));
     }
 
     public static void main(String args[]) {

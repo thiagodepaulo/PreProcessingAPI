@@ -189,13 +189,24 @@ public class Conversor {
             System.out.println(ss);
         }
     }
+    
+    public static Instances dataToArff2(Data data) {        
+        Instances inst = null;
+        try {
+            inst = new Instances(new StringReader(dataToStrArff(data)));
+            inst.setClassIndex(inst.numAttributes() - 1);
+        } catch (IOException ex) {
+            Logger.getLogger(Conversor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return inst;
+    }
 
     public static Instances dataToArff(Data data) throws IOException {
         int numDocs = data.getNumDocs();
         int numTerms = data.getNumTerms();
         
         //creating attributes
-        ArrayList<Attribute> attrs = new ArrayList<>();        
+        ArrayList<Attribute> attrs = new ArrayList<>();                
         for(String word: data.getTerms()) {
             attrs.add(new Attribute(word));            
         }        
@@ -207,11 +218,11 @@ public class Conversor {
         double[] zeros = new double[numTerms + 1];
         for(ArrayList<IndexValue> l: data.getAdjListDocs()) {
             SparseInstance inst = new SparseInstance(numTerms + 1);            
-            for(IndexValue iv: l) {
-                inst.setValue(iv.getIndex(), iv.getValue());
+            for(IndexValue iv: l) {                
+                inst.setValue(attrs.get(iv.getIndex()), iv.getValue());
             }            
             // set class value
-            inst.setValue(numTerms, data.getClassDocument(docId++));
+            inst.setValue(attrs.get(numTerms), data.getClassDocument(docId++));
             inst.replaceMissingValues(zeros);
             instances.add(inst);
         }

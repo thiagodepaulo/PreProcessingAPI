@@ -42,7 +42,7 @@ public class ExpTeste {
 
         Evaluator eval = new Evaluator(data);
 
-        TextClassifier cls = new WekaClassifier(new NaiveBayesMultinomial(), "", data);
+        TextClassifier cls = new WekaClassifier(new J48(), "", data);
         eval.crossValidateModel(cls, data, 10);
 
         
