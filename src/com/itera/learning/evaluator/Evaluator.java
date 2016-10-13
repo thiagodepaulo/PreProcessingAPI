@@ -45,6 +45,11 @@ public class Evaluator {
             adjList = testData.getAdjListDoc(docId);
             int realClassDoc = testData.getClassDocument(docId);
             int predClassDoc = model.classifyInstance(adjList);
+            //****
+            if (predClassDoc == -1) //
+                continue;
+            
+            
             this.confusionMatrix[realClassDoc][predClassDoc] += 1;
 
             if (realClassDoc != predClassDoc) {

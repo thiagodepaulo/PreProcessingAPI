@@ -8,6 +8,7 @@ package com.itera.learning.classifier;
 import com.itera.structures.Data;
 import com.itera.structures.IndexValue;
 import com.itera.structures.InputPattern;
+import com.itera.util.Tools;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +30,7 @@ public abstract class TextClassifier implements Classifier {
     protected String learningType;
 
     protected List<String> outputType;
-    
+
     private final String splitPattern = "\\s+";
 
     public TextClassifier(Data data, String learningType) {
@@ -53,6 +54,15 @@ public abstract class TextClassifier implements Classifier {
 
     public void setClasses(ArrayList<String> classes) {
         this.classes = classes;
+    }
+
+    public int getClassId(String className) {
+        for (int i = 0; i < this.classes.size(); i++) {
+            if (this.classes.get(i).equals(className)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public double[][] getRealClasses(Data data) {
@@ -94,15 +104,28 @@ public abstract class TextClassifier implements Classifier {
         return this.classes;
     }
 
-    public List<IndexValue> inputPatternToListIndexValue(InputPattern input) {         
+    public InputPattern listIndexValueToInputPattern(List<IndexValue> lInput) {
+        StringBuilder sb = new StringBuilder();
+        HashMap<Integer, String> ids_terms = Tools.invertHashMap(terms_ids);
+        String blank = " ";
+        for (IndexValue iv : lInput) {
+            for (int i = 0; i < iv.getValue(); i++) {
+                sb.append(ids_terms.get(iv.getIndex()));
+                sb.append(blank);
+            }
+        }
+        return new InputPattern(0, sb.toString(), "");
+    }
+
+    public List<IndexValue> inputPatternToListIndexValue(InputPattern input) {
         String[] words = input.getTexto().split(this.splitPattern);
         int wid;
         List<IndexValue> linput = new ArrayList<>();
-        HashMap<Integer, Double> map = new HashMap<>();        
-        for (String w : words) {                        
+        HashMap<Integer, Double> map = new HashMap<>();
+        for (String w : words) {
             w = w.trim();
-            if (terms_ids.containsKey(w)) {                
-                wid = terms_ids.get(w);                
+            if (terms_ids.containsKey(w)) {
+                wid = terms_ids.get(w);
                 if (map.containsKey(wid)) {
                     map.put(wid, map.get(wid) + 1.);
                 } else {
@@ -110,9 +133,9 @@ public abstract class TextClassifier implements Classifier {
                 }
             }
         }
-        for(int wwid: map.keySet()) {
+        for (int wwid : map.keySet()) {
             linput.add(new IndexValue(wwid, map.get(wwid)));
-        }        
+        }
         return linput;
     }
 

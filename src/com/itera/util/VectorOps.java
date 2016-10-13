@@ -42,6 +42,14 @@ public class VectorOps {
         return sum;
     }
 
+    public static double sum(double[] a) {
+        double sum = 0;
+        for (double v : a) {
+            sum += v;
+        }
+        return sum;
+    }
+
     public static double squaredSum(float[] a) {
         double sum = 0;
         for (float v : a) {
@@ -157,9 +165,23 @@ public class VectorOps {
         }
     }
 
+    public static <T> void print(T[] a) {
+        for (T t : a) {
+            System.out.print(t + " ");
+        }
+        System.out.println();
+    }
+
     public static void print(float[] a) {
-        for (float r : a) {
-            System.out.print(r + " ");
+        for (float t : a) {
+            System.out.print(t + " ");
+        }
+        System.out.println();
+    }
+
+    public static void print(double[] a) {
+        for (double t : a) {
+            System.out.print(t + " ");
         }
         System.out.println();
     }

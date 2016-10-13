@@ -8,6 +8,7 @@ package com.itera.test;
 import com.itera.io.CSVLoader;
 import com.itera.io.Loader;
 import com.itera.learning.classifier.TextClassifier;
+import com.itera.learning.classifier.supervised.BalancedEnsembleClassifier;
 import com.itera.learning.classifier.supervised.IMHM_DocTerm;
 import com.itera.learning.classifier.supervised.WekaClassifier;
 import com.itera.learning.evaluator.Evaluator;
@@ -42,7 +43,7 @@ public class ExpTeste {
 
         Evaluator eval = new Evaluator(data);
 
-        TextClassifier cls = new WekaClassifier(new J48(), "", data);
+        TextClassifier cls = new BalancedEnsembleClassifier(data, 100, 10);
         eval.crossValidateModel(cls, data, 10);
 
         
