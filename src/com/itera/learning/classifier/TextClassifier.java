@@ -6,6 +6,7 @@
 package com.itera.learning.classifier;
 
 import com.itera.structures.Data;
+import com.itera.structures.TextData;
 import com.itera.structures.IndexValue;
 import com.itera.structures.InputPattern;
 import com.itera.util.Tools;
@@ -33,7 +34,7 @@ public abstract class TextClassifier implements Classifier {
 
     private final String splitPattern = "\\s+";
 
-    public TextClassifier(Data data, String learningType) {
+    public TextClassifier(TextData data, String learningType) {
         this.classes = data.getClasses();
         this.terms_ids = data.getTermsIDs();
         this.fTerms = new double[data.getNumTerms()][data.getNumClasses()];
@@ -65,7 +66,7 @@ public abstract class TextClassifier implements Classifier {
         return -1;
     }
 
-    public double[][] getRealClasses(Data data) {
+    public double[][] getRealClasses(TextData data) {
         double[][] yDoc = new double[data.getNumDocs()][data.getNumClasses()];
         for (int doc = 0; doc < data.getNumDocs(); doc++) {
             int classe = data.getClassDocument(doc);
@@ -138,6 +139,8 @@ public abstract class TextClassifier implements Classifier {
         }
         return linput;
     }
+    
+    public abstract void buildClassifier(TextData data) throws Exception;
 
     public abstract int classifyInstance(InputPattern textInstance) throws Exception;
 

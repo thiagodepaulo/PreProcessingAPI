@@ -6,6 +6,7 @@
 package com.itera.io;
 
 import com.itera.preprocess.tools.CharsetRecognition;
+import com.itera.structures.DenseData;
 import com.itera.structures.InputPattern;
 import com.itera.structures.TermFreq;
 import java.io.BufferedReader;
@@ -32,7 +33,7 @@ public class DirectoryLoader implements Loader {
     }
 
     @Override
-    public List<InputPattern> load() {
+    public List<InputPattern> loadTextualData() {
         try {
             return loadCorpus(this.rootDir);
         } catch (IOException ex) {
@@ -96,9 +97,14 @@ public class DirectoryLoader implements Loader {
 
     public static void main(String args[]) {
         Loader loader = new DirectoryLoader("/home/thiagodepaulo/Modelo/");
-        List<InputPattern> corpus = loader.load();
+        List<InputPattern> corpus = loader.loadTextualData();
         System.out.println(corpus.size());
         System.out.println(corpus);
+    }
+
+    @Override
+    public DenseData loadDenseData() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

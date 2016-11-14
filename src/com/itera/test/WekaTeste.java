@@ -10,7 +10,7 @@ import com.itera.io.Loader;
 import com.itera.preprocess.config.PreProcessingConfig;
 import com.itera.preprocess.tools.Preprocessing;
 import com.itera.structures.Conversor;
-import com.itera.structures.Data;
+import com.itera.structures.TextData;
 import com.itera.structures.InputPattern;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -34,12 +34,12 @@ public class WekaTeste {
         String fileName = "/media/thiagodepaulo/Dados/Thiago/publicacoes/inotebook/publicacoes.docs";
         String sep = "\\|";
         Loader loader = new CSVLoader(fileName, sep);
-        List<InputPattern> linput = loader.load();
+        List<InputPattern> linput = loader.loadTextualData();
         PreProcessingConfig config = new PreProcessingConfig("portuguese", true, 2, false, true, true, false, true);
         linput = Preprocessing.preprocess(linput, config);
-        Data data = Conversor.listInputPatternToData(linput, config);
+        TextData data = Conversor.listInputPatternToTextData(linput, config);
         
-        Instances wdata = Conversor.dataToArff(data);
+        Instances wdata = Conversor.textDataToArff(data);
         weka.classifiers.evaluation.Evaluation eval = new weka.classifiers.evaluation.Evaluation(wdata);
         eval.crossValidateModel(new NaiveBayesMultinomial(), wdata, numFolds, new Random());
         System.out.println(eval.toSummaryString());

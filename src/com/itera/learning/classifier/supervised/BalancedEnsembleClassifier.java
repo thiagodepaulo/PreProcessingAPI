@@ -7,6 +7,8 @@ package com.itera.learning.classifier.supervised;
 
 import com.itera.learning.classifier.TextClassifier;
 import com.itera.structures.Data;
+import com.itera.structures.Example;
+import com.itera.structures.TextData;
 import com.itera.structures.IndexValue;
 import com.itera.structures.InputPattern;
 import com.itera.util.Tools;
@@ -26,7 +28,7 @@ public class BalancedEnsembleClassifier extends TextClassifier {
     private int nDocsPerClass = 50;
     private TextClassifier[] classifiers;
 
-    public BalancedEnsembleClassifier(Data data, int nSamples, int nDocsPerClass) {
+    public BalancedEnsembleClassifier(TextData data, int nSamples, int nDocsPerClass) {
         super(data, "supervised");
         this.nSamples = nSamples;
         this.nDocsPerClass = nDocsPerClass;
@@ -44,16 +46,16 @@ public class BalancedEnsembleClassifier extends TextClassifier {
     }
 
     @Override
-    public void buildClassifier(Data data) throws Exception {
-        Data[] vetData = randomSplitData(data);
+    public void buildClassifier(TextData data) throws Exception {
+        TextData[] vetData = randomSplitData(data);
         for (int i = 0; i < this.nSamples; i++) {
-            this.classifiers[i] = new WekaClassifier(new J48(), "-C 0.25 -M 2", vetData[i]);
+            this.classifiers[i] = new TextWekaClassifier(new J48(), "-C 0.25 -M 2", vetData[i]);
             this.classifiers[i].buildClassifier(vetData[i]);
         }
     }
 
     @Override
-    public int classifyInstance(List<IndexValue> instance) throws Exception {
+    public int classifyInstance(Example instance) throws Exception {
         int[] votes = new int[this.classes.size()];
         for (int i = 0; i < this.nSamples; i++) {
             int classId = this.classifiers[i].classifyInstance(instance);
@@ -63,7 +65,7 @@ public class BalancedEnsembleClassifier extends TextClassifier {
     }
 
     @Override
-    public double[] distributionForInstance(List<IndexValue> instance) throws Exception {
+    public double[] distributionForInstance(Example instance) throws Exception {
         double[] dist = new double[this.classes.size()];
         for (int i = 0; i < this.nSamples; i++) {
             double[] r = this.classifiers[i].distributionForInstance(instance);
@@ -72,7 +74,7 @@ public class BalancedEnsembleClassifier extends TextClassifier {
         return VectorOps.normalize(dist);
     }
 
-    private int[][] dataClassDocs(Data data) {
+    private int[][] dataClassDocs(TextData data) {
 
         int numClass = data.getNumClasses();
         int[][] dataClassDocs = new int[numClass][];
@@ -91,10 +93,10 @@ public class BalancedEnsembleClassifier extends TextClassifier {
         return dataClassDocs;
     }
 
-    public Data[] randomSplitData(Data data) {
+    public TextData[] randomSplitData(TextData data) {
         Random r = new Random(System.currentTimeMillis());
         int[][] dataClassDocs = this.dataClassDocs(data);
-        Data[] vetData = new Data[this.nSamples];
+        TextData[] vetData = new TextData[this.nSamples];
         for (int i = 0; i < this.nSamples; i++) {
             vetData[i] = data.newCopy();
             int newDocId;
@@ -117,5 +119,10 @@ public class BalancedEnsembleClassifier extends TextClassifier {
             }
         }
         return vetData;
+    }
+
+    @Override
+    public void buildClassifier(Data data) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

@@ -8,11 +8,11 @@ package com.itera.test;
 import com.itera.io.CSVLoader;
 import com.itera.io.Loader;
 import com.itera.learning.classifier.TextClassifier;
-import com.itera.learning.classifier.supervised.WekaClassifier;
+import com.itera.learning.classifier.supervised.TextWekaClassifier;
 import com.itera.preprocess.config.PreProcessingConfig;
 import com.itera.preprocess.tools.Preprocessing;
 import com.itera.structures.Conversor;
-import com.itera.structures.Data;
+import com.itera.structures.TextData;
 import com.itera.structures.InputPattern;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -35,22 +35,22 @@ public class WekaTeste3 {
         String fileName = "/media/thiagodepaulo/Dados/Thiago/publicacoes/inotebook/publicacoes.docs";
         String sep = "\\|";
         Loader loader = new CSVLoader(fileName, sep);
-        List<InputPattern> linput = loader.load();
+        List<InputPattern> linput = loader.loadTextualData();
         PreProcessingConfig config = new PreProcessingConfig("portuguese", true, 2, false, true, true, false, true);
         linput = Preprocessing.preprocess(linput, config);
-        Data myData = Conversor.listInputPatternToData(linput, config);
+        TextData myData = Conversor.listInputPatternToTextData(linput, config);
 
         myData.stratify(10);
         for (int i = 0; i < numFolds; i++) {
             System.out.println("Cross-validation " + i);
-            Data train = myData.trainCV(numFolds, i);
-            Instances wtrain = Conversor.dataToArff(train);
+            TextData train = myData.trainCV(numFolds, i);
+            Instances wtrain = Conversor.textDataToArff(train);
 
-            Data test = myData.testCV(numFolds, i);
-            Instances wtest = Conversor.dataToArff(test);
+            TextData test = myData.testCV(numFolds, i);
+            Instances wtest = Conversor.textDataToArff(test);
 
             AbstractClassifier wcls = new NaiveBayesMultinomial();
-            TextClassifier mycls = new WekaClassifier(wcls, " ", train);
+            TextClassifier mycls = new TextWekaClassifier(wcls, " ", train);
 
             System.out.println("Treinando...");
             wcls.buildClassifier(wtrain);

@@ -5,10 +5,10 @@
  */
 package com.itera.test;
 
-import com.itera.learning.classifier.supervised.WekaClassifier;
+import com.itera.learning.classifier.supervised.TextWekaClassifier;
 import com.itera.learning.evaluator.Evaluator;
 import com.itera.structures.Conversor;
-import com.itera.structures.Data;
+import com.itera.structures.TextData;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,19 +25,19 @@ public class TesteIO {
     public static void main(String[] args) throws Exception {
         boolean save = false;
         String arffArqName = "/home/thiagodepaulo/teste_jurídico.arff";
-        Data data = Conversor.arffToData(arffArqName);        
+        TextData data = Conversor.arffToData(arffArqName);        
         
         
-        Data train = data.trainCV(10, 0);
-        Data teste = data.testCV(10, 0);                
+        TextData train = data.trainCV(10, 0);
+        TextData teste = data.testCV(10, 0);                
         
         if (save) {
-            WekaClassifier wcls = new WekaClassifier(new J48(), "", data);
+            TextWekaClassifier wcls = new TextWekaClassifier(new J48(), "", data);
             wcls.buildClassifier(train);
             save(wcls);
         } else {
             System.out.println("loading...");
-            WekaClassifier wcls = load("obj.tct");
+            TextWekaClassifier wcls = load("obj.tct");
             System.out.println("loaded");
             int clsid = wcls.classifyInstance(teste.getAdjListDoc(0));
             System.out.println(clsid);
@@ -52,9 +52,9 @@ public class TesteIO {
         out.close();
     }
     
-    public static WekaClassifier load(String arq) throws IOException, ClassNotFoundException {
+    public static TextWekaClassifier load(String arq) throws IOException, ClassNotFoundException {
         ObjectInputStream in = new ObjectInputStream(new FileInputStream(arq));
-        return (WekaClassifier)in.readObject();
+        return (TextWekaClassifier)in.readObject();
     }
     
 }

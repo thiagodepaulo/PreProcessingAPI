@@ -7,8 +7,11 @@ package com.itera.learning.classifier.supervised;
 
 import com.itera.learning.classifier.TextClassifier;
 import com.itera.structures.Data;
+import com.itera.structures.Example;
+import com.itera.structures.TextData;
 import com.itera.structures.IndexValue;
 import com.itera.structures.InputPattern;
+import com.itera.structures.SparseExample;
 import com.itera.util.VectorOps;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +30,7 @@ public class IMHM_DocTerm extends TextClassifier {
     private int maxNumberIterations; // Maximum number of iterations
     private double minError; // Minimum Mean Squared Error
 
-    public IMHM_DocTerm(Data data, double errorCorrectionRate, double minError, int maxNumIterations) {
+    public IMHM_DocTerm(TextData data, double errorCorrectionRate, double minError, int maxNumIterations) {
         super(data, "supervised");
         this.errorCorrectionRate = errorCorrectionRate;
         this.minError = minError;
@@ -35,7 +38,7 @@ public class IMHM_DocTerm extends TextClassifier {
     }
 
     @Override
-    public void buildClassifier(Data data) throws Exception {
+    public void buildClassifier(TextData data) throws Exception {
         System.out.println("- Alocando estrutura de dados...");
 
         numDocs = data.getNumDocs();
@@ -181,25 +184,42 @@ public class IMHM_DocTerm extends TextClassifier {
         return classes;
     }
 
- 
     @Override
     public double[] distributionForInstance(InputPattern instance) throws Exception {
-        return this.distributionForInstance(super.inputPatternToListIndexValue(instance));
+        return this.distributionForInstance(new SparseExample(super.inputPatternToListIndexValue(instance)));
     }
 
-    @Override
+    /**
+     * REVIEW
+     * @param textInstance
+     * @return
+     * @throws Exception 
+     */
+    @Override   
     public int classifyInstance(InputPattern textInstance) throws Exception {
-        return classifyInstance(super.inputPatternToListIndexValue(textInstance));
+        return classifyInstance(new SparseExample(super.inputPatternToListIndexValue(textInstance)));
     }
 
     @Override
-    public int classifyInstance(List<IndexValue> instance) throws Exception {
+    public int classifyInstance(Example instance) throws Exception {
         return VectorOps.argmax(this.distributionForInstance(instance));
     }
 
+    
+
     @Override
-    public double[] distributionForInstance(List<IndexValue> instance) throws Exception {
-        return this.classifyInstance2((ArrayList<IndexValue>) instance);
+    public double[] distributionForInstance(Example instance) throws Exception {
+        if (instance instanceof SparseExample) {
+            SparseExample ex = (SparseExample) instance;
+            return this.classifyInstance2((ArrayList<IndexValue>) ex.getListIndexValues());
+        } else {
+            throw new RuntimeException("It is allowed only to SparseExample instances!");
+        }        
+    }
+
+    @Override
+    public void buildClassifier(Data data) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

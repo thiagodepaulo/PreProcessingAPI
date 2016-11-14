@@ -6,7 +6,8 @@
 package com.itera.learning.evaluator;
 
 import com.itera.learning.classifier.Classifier;
-import com.itera.structures.Data;
+import com.itera.structures.Example;
+import com.itera.structures.TextData;
 import com.itera.structures.IndexValue;
 import java.util.ArrayList;
 
@@ -24,7 +25,7 @@ public class Evaluator {
     public int withClass;
     public String[] classNames;
 
-    public Evaluator(Data data) {
+    public Evaluator(TextData data) {
         this.nClass = data.getNumClasses();
         this.incorrect = 0;
         this.correct = 0;
@@ -37,18 +38,14 @@ public class Evaluator {
         }
     }
 
-    public void evaluateClassifier(Classifier model, Data testData) throws Exception {
+    public void evaluateClassifier(Classifier model, TextData testData) throws Exception {
 
-        ArrayList<IndexValue> adjList;
+        Example example;
 
         for (int docId : testData.getDocsIds()) {
-            adjList = testData.getAdjListDoc(docId);
+            example = testData.getExample(docId);
             int realClassDoc = testData.getClassDocument(docId);
-            int predClassDoc = model.classifyInstance(adjList);
-            //****
-            if (predClassDoc == -1) //
-                continue;
-            
+            int predClassDoc = model.classifyInstance(example);
             
             this.confusionMatrix[realClassDoc][predClassDoc] += 1;
 
@@ -61,7 +58,7 @@ public class Evaluator {
         }
     }
 
-    public void crossValidateModel(Classifier classifier, Data data, int numFolds)
+    public void crossValidateModel(Classifier classifier, TextData data, int numFolds)
             throws Exception {
         // Make a copy of the data we can reorder
         //data.randomize(random);
@@ -70,9 +67,9 @@ public class Evaluator {
         
         for (int i = 0; i < numFolds; i++) {
             System.out.println("cross-validation " + i);
-            Data train = data.trainCV(numFolds, i);
+            TextData train = data.trainCV(numFolds, i);
             classifier.buildClassifier(train);
-            Data test = data.testCV(numFolds, i);
+            TextData test = data.testCV(numFolds, i);
             this.evaluateClassifier(classifier, test);
         }
     }

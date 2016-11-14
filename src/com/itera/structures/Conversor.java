@@ -27,6 +27,7 @@ import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import static com.itera.util.Tools.join;
+import weka.core.DenseInstance;
 import weka.core.SparseInstance;
 
 /**
@@ -35,7 +36,7 @@ import weka.core.SparseInstance;
  */
 public class Conversor {
 
-    public static Data listInputPatternToData(List<InputPattern> lInput, PreProcessingConfig config) {
+    public static TextData listInputPatternToTextData(List<InputPattern> lInput, PreProcessingConfig config) {
         HashMap<String, Integer> classesIds = new HashMap<>();
         HashMap<Integer, Integer> classesDocs = new HashMap<>();
         HashMap<Integer, Double> termDf = new HashMap<>();
@@ -88,7 +89,7 @@ public class Conversor {
             }
         }
 
-        Data data = new Data();
+        TextData data = new TextData();
         String[] classes = new String[classesIds.size()];
         for (Map.Entry<String, Integer> entryClasses : classesIds.entrySet()) {
             classes[entryClasses.getValue()] = entryClasses.getKey();
@@ -115,7 +116,45 @@ public class Conversor {
         return data;
     }
 
-    public static Data arffToData(String arffArqName) {
+    public static Instances dataToArff(Data data) {
+        int numEx = data.numExamples();
+        int numFeat = data.numFeatures();
+
+        //creating attributes
+        ArrayList<Attribute> attrs = new ArrayList<>();
+        Feature feat;
+        for (int i = 0; i < numFeat; i++) {
+            feat = data.getFeature(i);
+            if (feat.getType() == Feature.FeatureType.NOMINAL) {
+                attrs.add(new Attribute(feat.getFeatureName(), Arrays.asList(feat.categories)));
+            } else if (feat.getType() == Feature.FeatureType.NUMERIC) {
+                attrs.add(new Attribute(feat.getFeatureName()));
+            }
+        }
+        //creating instances
+        Instances instances = new Instances(data.getDataName(), attrs, numEx);
+        instances.setClassIndex(data.getClassIndex());
+
+        while (data.itrExamples().hasNext()) {
+            Example ex = data.itrExamples().next();
+            DenseInstance inst = new DenseInstance(numFeat);
+            for (int i = 0; i < numFeat; i++) {
+                feat = data.getFeature(i);
+                if (feat.getType() == Feature.FeatureType.NOMINAL) {
+                    String value = (String) ex.getValue(i);
+                    inst.setValue(i, value);
+                } else if (feat.getType() == Feature.FeatureType.NUMERIC) {
+                    Double value = (Double) ex.getValue(i);
+                    inst.setValue(i, value);
+                }                
+            }
+            instances.add(inst);
+        }
+
+        return instances;
+    }
+
+    public static TextData arffToData(String arffArqName) {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(arffArqName));
             Instances arff = new Instances(reader);
@@ -130,7 +169,7 @@ public class Conversor {
             int numInsts = arff.numInstances();
             int clsIdx = arff.classIndex();
 
-            Data data = new Data();
+            TextData data = new TextData();
             ArrayList<String> classes = new ArrayList<>(numCls);
             for (int i = 0; i < numCls; i++) {
                 classes.add(i, null);
@@ -192,10 +231,10 @@ public class Conversor {
         }
     }
 
-    public static Instances dataToArff2(Data data) {
+    public static Instances textDataToArff2(TextData data) {
         Instances inst = null;
         try {
-            inst = new Instances(new StringReader(dataToStrArff(data)));
+            inst = new Instances(new StringReader(textDataToStrArff(data)));
             inst.setClassIndex(inst.numAttributes() - 1);
         } catch (IOException ex) {
             Logger.getLogger(Conversor.class.getName()).log(Level.SEVERE, null, ex);
@@ -203,7 +242,7 @@ public class Conversor {
         return inst;
     }
 
-    public static Instances dataToArff(Data data) throws IOException {
+    public static Instances textDataToArff(TextData data) throws IOException {
         int numDocs = data.getNumDocs();
         int numTerms = data.getNumTerms();
 
@@ -232,7 +271,7 @@ public class Conversor {
         return instances;
     }
 
-    public static String dataToStrArff(Data data) {
+    public static String textDataToStrArff(TextData data) {
         StringBuilder sb = new StringBuilder();
         String nl = "\n", blank = " ", open = "{", close = "}", comma = ", ";
         String attr = "@ATTRIBUTE", real = "REAL";

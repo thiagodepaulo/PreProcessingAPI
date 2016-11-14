@@ -8,7 +8,7 @@ package com.itera.preprocess.tools;
 
 import com.itera.preprocess.config.PreProcessingConfig;
 import com.itera.preprocess.contextexpansion.ContextExpasion;
-import com.itera.structures.Data;
+import com.itera.structures.TextData;
 import com.itera.structures.InputPattern;
 import com.itera.structures.TermFreq;
 import com.itera.preprocess.contextexpansion.JavaWord2Vec;

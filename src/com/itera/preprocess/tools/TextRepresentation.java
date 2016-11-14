@@ -9,7 +9,7 @@ package com.itera.preprocess.tools;
 
 import com.itera.preprocess.config.PreProcessingConfig;
 import com.itera.io.ListFiles;
-import com.itera.structures.Data;
+import com.itera.structures.TextData;
 import com.itera.structures.FeatureList;
 import com.itera.structures.IndexValue;
 import com.itera.structures.InputPattern;
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 public class TextRepresentation {
 
     //Function to read a text collection and generate a document-term matrix
-    public static Data RepresentTM(String dirIn, PreProcessingConfig configuration, String w2vDir) {
+    public static TextData RepresentTM(String dirIn, PreProcessingConfig configuration, String w2vDir) {
 
         JavaWord2Vec w2v = null;
 
@@ -44,7 +44,7 @@ public class TextRepresentation {
 
         System.out.println("Pré-processando Textos...");
 
-        Data data = new Data();
+        TextData data = new TextData();
 
         ArrayList<String> allClasses = new ArrayList<String>();
         ArrayList<String> names = new ArrayList<String>();
@@ -193,7 +193,7 @@ public class TextRepresentation {
         return data;
     }
 
-    public static Data RepresentTM(List<InputPattern> dados, PreProcessingConfig configuration, String w2vDir) {
+    public static TextData RepresentTM(List<InputPattern> dados, PreProcessingConfig configuration, String w2vDir) {
 
         JavaWord2Vec w2v = null;
 
@@ -207,7 +207,7 @@ public class TextRepresentation {
 
         System.out.println("Pré-processando Textos...");
 
-        Data data = new Data();
+        TextData data = new TextData();
 
         ArrayList<String> allClasses = new ArrayList<>();
         ArrayList<String> names = new ArrayList<>();
@@ -350,11 +350,11 @@ public class TextRepresentation {
         return data;
     }
 
-    public static Data RepresentNLP(String dirIn, PreProcessingConfig configuration) {
+    public static TextData RepresentNLP(String dirIn, PreProcessingConfig configuration) {
 
         System.out.println("Pré-processando Textos...");
 
-        Data data = new Data();
+        TextData data = new TextData();
 
         ArrayList<String> allClasses = new ArrayList<String>();
         ArrayList<String> names = new ArrayList<String>();

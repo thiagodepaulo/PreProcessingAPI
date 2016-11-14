@@ -6,7 +6,7 @@
 package com.itera.test;
 
 import com.itera.structures.Conversor;
-import com.itera.structures.Data;
+import com.itera.structures.TextData;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -26,13 +26,13 @@ public class WekaTeste2 {
         Instances wdata = new Instances(reader);
         reader.close();
         
-        Data data = Conversor.arffToData(arffArqName);
+        TextData data = Conversor.arffToData(arffArqName);
         data.stratify(10);
-        Data teste = data.testCV(10, 1);
-        Data train = data.trainCV(10, 1);
+        TextData teste = data.testCV(10, 1);
+        TextData train = data.trainCV(10, 1);
         
-        Instances wteste = Conversor.dataToArff(teste);
-        Instances wtrain = Conversor.dataToArff(train);
+        Instances wteste = Conversor.textDataToArff(teste);
+        Instances wtrain = Conversor.textDataToArff(train);
         
         NaiveBayesMultinomial cls = new NaiveBayesMultinomial();
         cls.buildClassifier(wtrain);

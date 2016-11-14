@@ -33,7 +33,7 @@ public class Tools {
         }
         return invMap;
     }
-    
+
     public static boolean saveFile(String fileName, String content) {
         try {
             PrintWriter pw = new PrintWriter(fileName);
@@ -45,19 +45,19 @@ public class Tools {
             return false;
         }
     }
-    
+
     public static String join(String sep, Iterable<String> collection) {
         StringBuilder sb = new StringBuilder();
         Iterator<String> itrStr = collection.iterator();
-        if(itrStr.hasNext()) {
+        if (itrStr.hasNext()) {
             sb.append(itrStr.next());
-            while(itrStr.hasNext()) {
+            while (itrStr.hasNext()) {
                 sb.append(sep);
                 sb.append(itrStr.next());
             }
         }
         return sb.toString();
-    }       
+    }
 
     public static String readFile(File file) {
         ArrayList<TermFreq> atributos = new ArrayList<>();
@@ -84,6 +84,14 @@ public class Tools {
         }
 
         return txt.toString();
+    }
+
+    public static boolean isNumeric(String str) {
+        return str.matches("-?\\d+(\\.\\d+)?");  //match a number with optional '-' and decimal.
+    }
+    
+    public static void main(String args[]) {
+        System.out.println(isNumeric(" 00.699".trim()));
     }
 
 }

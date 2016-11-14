@@ -5,6 +5,7 @@
  */
 package com.itera.io;
 
+import com.itera.structures.DenseData;
 import com.itera.structures.InputPattern;
 import java.util.List;
 
@@ -14,6 +15,8 @@ import java.util.List;
  */
 public interface Loader {
     
-    public List<InputPattern> load();
+    public List<InputPattern> loadTextualData();
+    
+    public DenseData loadDenseData();
 
 }
