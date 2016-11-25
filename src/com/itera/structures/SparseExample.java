@@ -15,13 +15,25 @@ import java.util.List;
 public class SparseExample implements Example {
     
     private List<IndexValue> instance;    
+    private int classValue;
+    private String classNominalValue;
     
     public SparseExample() {
-        this(new ArrayList<IndexValue>());
+        this(new ArrayList<IndexValue>(), -1, "");        
+    }
+    
+    public SparseExample(List<IndexValue> instance, int classValue) {
+        this(instance, classValue, ""+classValue);
+    }
+    
+    public SparseExample(List<IndexValue> instance, int classValue, String classNominalValue) {
+        this.instance = instance;
+        this.classValue = classValue;
+        this.classNominalValue = classNominalValue;
     }
     
     public SparseExample(List<IndexValue> instance) {
-        this.instance = instance;
+        this(instance, -1);
     }
     
     public void add(IndexValue iv) {
@@ -62,6 +74,21 @@ public class SparseExample implements Example {
     @Override
     public void setValue(int index, String value) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public double getNumericValue(int index) {
+        return search(index).getValue();
+    }
+ 
+    @Override
+    public int getClassValue() {
+        return this.classValue;
+    }
+
+    @Override
+    public String getClassNominalValue() {
+        return this.classNominalValue;
     }
     
 }

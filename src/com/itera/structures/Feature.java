@@ -5,6 +5,8 @@
  */
 package com.itera.structures;
 
+import com.itera.util.Tools;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -16,7 +18,7 @@ public class Feature {
     public enum FeatureType {
         NUMERIC, NOMINAL;
     }
-    
+
     public String[] categories;
 
     private FeatureType type;
@@ -41,15 +43,16 @@ public class Feature {
         return featureName;
     }
 
-    public double valIndex(String value) { 
-        if (this.categories == null) 
+    public double valIndex(String value) {
+        if (this.categories == null) {
             return -1;
+        }
         for (int i = 0; i < this.categories.length; i++) {
             if (this.categories[i].equals(value)) {
                 return i;
             }
         }
-        return -1;                
+        return -1;
     }
 
     public String[] getCategories() {
@@ -60,6 +63,14 @@ public class Feature {
         }
     }
 
+    public String getFeatureCategorie(int value) {
+        if (this.getType() == FeatureType.NOMINAL) {
+            return this.categories[value];
+        } else {
+            return "" + value;
+        }
+    }
+
     @Override
     public int hashCode() {
         int hash = 3;
@@ -67,8 +78,6 @@ public class Feature {
         hash = 89 * hash + Objects.hashCode(this.featureName);
         return hash;
     }
-
-    
 
     @Override
     public boolean equals(Object obj) {
@@ -89,6 +98,16 @@ public class Feature {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        if (this.type == FeatureType.NOMINAL) {
+            return this.featureName+" (" + Tools.join(",", Arrays.asList(this.categories))+")";            
+        } else if (this.type == FeatureType.NUMERIC) {
+            return this.featureName;
+        }
+        return null;
     }
 
 }

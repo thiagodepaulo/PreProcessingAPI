@@ -34,6 +34,8 @@ public class TextData implements Data, Serializable {
     private ArrayList<ArrayList<IndexValue>> documents;
     private HashMap<Integer, Integer> classesDocuments;
     
+    private int classIndex = -1;
+    
     public TextData newCopy() {
         TextData data = new TextData();
         data.terms_ids = this.terms_ids;
@@ -51,6 +53,7 @@ public class TextData implements Data, Serializable {
         setDocsIDs(new HashMap<String, Integer>());
         setIDsDocs(new HashMap<Integer, String>());
         setClassesDocuments(new HashMap<Integer, Integer>());
+        this.classIndex = this.getNumTerms();
     }
 
     public int[] getNumDocsPerClasses() {
@@ -73,7 +76,7 @@ public class TextData implements Data, Serializable {
         return terms_ids.size();
     }
 
-    public Integer getNumClasses() {
+    public int getNumClasses() {
         return classes.size();
     }
 
@@ -83,7 +86,6 @@ public class TextData implements Data, Serializable {
         } else {
             return -1;
         }
-
     }
 
     public ArrayList<ArrayList<IndexValue>> getAdjListTerms() {
@@ -227,11 +229,7 @@ public class TextData implements Data, Serializable {
     public void setIDsTerms(HashMap<Integer, String> ids_terms) {
         this.ids_terms = ids_terms;
     }
-
-    public String toString() {
-        return documents.toString();
-    }
-
+   
     /**
      * Stratifies a set of instances according to its class values if the class
      * attribute is nominal (so that afterwards a stratified cross-validation
@@ -372,7 +370,7 @@ public class TextData implements Data, Serializable {
      */
     // @ requires 2 <= numFolds && numFolds < numInstances();
     // @ requires 0 <= numFold && numFold < numFolds;
-    public TextData testCV(int numFolds, int numFold) {
+    public TextData testCV(int numFolds, int numFold) { 
 
         int numInstForFold, first, offset;
         TextData test;
@@ -416,17 +414,20 @@ public class TextData implements Data, Serializable {
 
     @Override
     public Example getExample(int exId) {
-        return new SparseExample(this.documents.get(exId));
+        return new SparseExample(this.documents.get(exId), this.getClassDocument(exId), this.classes.get(this.getClassDocument(exId)));
     }
 
     @Override
     public Feature getFeature(int position) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if(position == -1) {                        
+            return new Feature(Feature.FeatureType.NOMINAL, "classe", this.classes.toArray(new String[this.classes.size()]));
+        }
+        return new Feature(this.ids_terms.get(position));        
     }
 
     @Override
     public int numExamples() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.getNumDocs();
     }
 
     @Override
@@ -438,15 +439,23 @@ public class TextData implements Data, Serializable {
     public void setClassIndex(int idx) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
+    
 
     @Override
     public int getClassIndex() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.classIndex;
     }
 
     @Override
     public Iterator<? extends Example> itrExamples() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        List<SparseExample> l = new ArrayList<>();
+        for(int docId = 0; docId < this.documents.size(); docId++) {
+            SparseExample ex = new SparseExample(this.documents.get(docId), this.classesDocuments.get(docId), this.classes.get(this.classesDocuments.get(docId)));
+            l.add(ex);
+        }
+        return l.iterator();
     }
 
     @Override
@@ -458,6 +467,26 @@ public class TextData implements Data, Serializable {
     public String getDataName() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public void setLastAsClassIndex() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+     public String toString() {
+         StringBuilder sb = new StringBuilder();
+         
+         for(int docId = 0; docId < this.documents.size(); docId++) {
+             sb.append(docId +"("+this.ids_docs.get(docId)+")");
+             for(IndexValue iv: this.documents.get(docId)) {
+                 for(int i=0; i<iv.getValue(); i++)
+                     sb.append(" "+this.ids_terms.get(iv.getIndex()));
+             }
+             sb.append("\n");
+         }
+        return sb.toString();
+    }
+
     
     
 }

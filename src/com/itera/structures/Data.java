@@ -24,12 +24,22 @@ public interface Data {
     
     public void setClassIndex(int idx);
     
+    public void setLastAsClassIndex();
+    
     public int getClassIndex();
     
-    public Iterator<? extends Example> itrExamples(); 
+    public int getNumClasses();
+    
+    public Iterator<? extends Example> itrExamples();
     
     public ArrayList<Feature> listFeatures();    
     
     public String getDataName();
+        
+    public void stratify(int numFolds); 
+    
+    public Data trainCV(int numFolds, int numFold);
+    
+    public Data testCV(int numFolds, int numFold);
     
 }

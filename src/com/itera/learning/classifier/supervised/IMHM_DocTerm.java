@@ -39,7 +39,7 @@ public class IMHM_DocTerm extends TextClassifier {
 
     @Override
     public void buildClassifier(TextData data) throws Exception {
-        System.out.println("- Alocando estrutura de dados...");
+        //System.out.println("- Alocando estrutura de dados...");
 
         numDocs = data.getNumDocs();
         numClasses = data.getNumClasses();
@@ -74,11 +74,11 @@ public class IMHM_DocTerm extends TextClassifier {
         int nextInterval = interval;
 
         // Learning Algorithm
-        System.out.print("- Aprendendo...");
+        //System.out.print("- Aprendendo...");
         int numIt = 0;
         boolean exit = false;
         while (exit == false) {
-            System.out.print("\n-- Iteração " + (numIt + 1) + " ");
+            //System.out.print("\n-- Iteração " + (numIt + 1) + " ");
             double meanError = 0;
             //Optimizing class information of terms considering labeled documents
             nextInterval = interval;
@@ -96,7 +96,7 @@ public class IMHM_DocTerm extends TextClassifier {
                 }
                 double perc = ((doc) / (double) numDocs) * 100;
                 if (perc > nextInterval) {
-                    System.out.print(".");
+                    //System.out.print(".");
                     nextInterval += interval;
                 }
             }
@@ -219,7 +219,7 @@ public class IMHM_DocTerm extends TextClassifier {
 
     @Override
     public void buildClassifier(Data data) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.buildClassifier((TextData)data);
     }
 
 }

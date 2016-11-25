@@ -57,8 +57,12 @@ public class DenseExample implements Example {
         return values[index];
     }
 
+    public double getNumericValue(int index) {
+        return values[index];
+    }
+
     public void setValue(int index, double value) {
-        
+
         if (this.getNumFeatures() <= index) {
             throw new RuntimeException("Feature index out of bound exception!");
         }
@@ -70,7 +74,7 @@ public class DenseExample implements Example {
         sb.append("(");
         int i = 0;
         Feature feat;
-        for (; i < this.getNumFeatures() - 1; i++) {            
+        for (; i < this.getNumFeatures() - 1; i++) {
             if (dataset != null && dataset.getFeature(i).getType() == Feature.FeatureType.NOMINAL) {
                 sb.append(dataset.getFeature(i).categories[(int) this.values[i]]);
             } else {
@@ -78,7 +82,7 @@ public class DenseExample implements Example {
             }
             sb.append(", ");
         }
-        
+
         if (dataset != null && dataset.getFeature(i).getType() == Feature.FeatureType.NOMINAL) {
             sb.append(dataset.getFeature(i).categories[(int) this.values[i]]);
         } else {
@@ -86,6 +90,16 @@ public class DenseExample implements Example {
         }
         sb.append(")");
         return sb.toString();
+    }
+
+    @Override
+    public int getClassValue() {
+        return (int) this.values[this.dataset.getClassIndex()];
+    }
+
+    @Override
+    public String getClassNominalValue() {
+        return dataset.getFeature(this.dataset.getClassIndex()).getFeatureCategorie(this.getClassValue());
     }
 
 }

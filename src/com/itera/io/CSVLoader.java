@@ -33,6 +33,7 @@ public class CSVLoader implements Loader {
     private boolean headFirstLine = false;
     private String fileName;
     private String sep;
+    private static final String STR_NUMERIC = "__NUMERIC__";
 
     public CSVLoader(String fileName) {
         this(fileName, ",", false);
@@ -69,43 +70,45 @@ public class CSVLoader implements Loader {
         return null;
     }
 
-    public static void main(String args[]) {
-        String s = "oi, como vai você? | casa";
-        String[] v = s.split("\\|");
-        System.out.println(Arrays.asList(v));
-    }
-
     @Override
     public DenseData loadDenseData() {
         try {
-            ArrayList<InputPattern> l = new ArrayList<>();
+            HashMap<Integer, String[]> data = new HashMap<>();
             BufferedReader br = new BufferedReader(new FileReader(this.fileName));
             String line = null;
-            int lineCount = 0;
-            ArrayList<Feature> lFeatures = new ArrayList<>();
-            HashMap<Integer, Set<String>> typeCat = new HashMap<>();
-            ArrayList<Feature.FeatureType> lFeatType = new ArrayList<>();
-            ArrayList<String[]> lExamples = new ArrayList<>();
+            int count = 0;
             while ((line = br.readLine()) != null) {
-                if (lineCount == 0 && this.headFirstLine) {
-                    lineCount++;
+                if (this.headFirstLine && count == 0) {
+                    count++;
                     continue;
-                }                
+                }
                 String[] cols = line.split(this.sep);
-                lExamples.add(cols);                
-                for (int j=0; j < cols.length; j++) {
-                    cols[j] = cols[j].trim();
-                    if (Tools.isNumeric(cols[j])) {
-                        
-                    } else {
-                        if (!typeCat.containsKey(j)) {
-                            typeCat.put(j, new HashSet<String>());
-                        }
-                        typeCat.get(j).add(cols[j]);
-                    }
+                if (cols.length > 1) {
+                    data.put(count++, cols);
                 }
             }
-            DenseData dd = new DenseData("Dataset", lFeatures, lFeatures.size() - 1);
+
+            ArrayList<Feature> lFeatures = createFeatures(data);
+            int classId = lFeatures.size() - 1;
+            DenseData dd = new DenseData("Dataset", lFeatures, classId);
+
+            for (int id : data.keySet()) {
+                String[] cols = data.get(id);
+                DenseExample ex = new DenseExample(dd);
+                int col = 0;
+                for (String s : cols) {
+                    s = s.trim();
+                    if (Tools.isNumeric(s)) {
+                        ex.setValue(col, Double.parseDouble(s));
+                    } else {
+                        //System.out.println(col+" "+s);
+                        ex.setValue(col, s);
+                    }
+                    col += 1;
+                }
+                dd.addExample(ex);
+            }
+
             return dd;
         } catch (FileNotFoundException ex) {
             Logger.getLogger(CSVLoader.class.getName()).log(Level.SEVERE, null, ex);
@@ -113,6 +116,52 @@ public class CSVLoader implements Loader {
             Logger.getLogger(CSVLoader.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
-    }    
+    }
+
+    public ArrayList<Feature> createFeatures(HashMap<Integer, String[]> data) {
+        HashMap<Integer, HashSet<String>> colsCat = new HashMap<>();
+        for (int id : data.keySet()) {
+            int col = 0;
+            for (String s : data.get(id)) {
+                s = s.trim();
+                if (!colsCat.containsKey(col)) {
+                    colsCat.put(col, new HashSet<String>());
+                }
+                if (Tools.isNumeric(s)) {
+                    colsCat.put(col, null);
+                } else {
+                    //System.out.println(col + " " + s);
+                    colsCat.get(col).add(s);
+                }
+                col += 1;
+            }
+        }
+
+        ArrayList<Feature> l = new ArrayList<>();
+        for (int col : colsCat.keySet()) {
+            Feature f = null;
+            if (colsCat.get(col) != null) {
+                HashSet<String> cat = colsCat.get(col);
+                String[] strCat = new String[cat.size()];
+                int i = 0;
+                for (String s : cat) {
+                    strCat[i++] = s;
+                }
+                f = new Feature(Feature.FeatureType.NOMINAL, "feat_" + col, strCat);
+            } else {
+                f = new Feature("feat_" + col);
+            }
+            l.add(f);
+        }
+        return l;
+    }
+
+    public static void main(String[] args) {
+        String arq = "/home/thiagodepaulo/Downloads/bank.csv";
+        CSVLoader loader = new CSVLoader(arq, ",", true);
+        DenseData data = loader.loadDenseData();
+        System.out.println(data.numExamples());
+        System.out.println(data);
+    }
 
 }

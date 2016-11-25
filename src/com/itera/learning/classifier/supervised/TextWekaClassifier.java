@@ -13,7 +13,6 @@ import com.itera.structures.TextData;
 import com.itera.structures.IndexValue;
 import com.itera.structures.InputPattern;
 import com.itera.structures.SparseExample;
-import java.util.ArrayList;
 import java.util.List;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Instance;
@@ -102,7 +101,7 @@ public class TextWekaClassifier extends TextClassifier {
 
     @Override
     public void buildClassifier(Data data) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.buildClassifier((TextData)data);
     }
 
 }

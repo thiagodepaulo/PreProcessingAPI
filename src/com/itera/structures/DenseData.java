@@ -69,6 +69,10 @@ public class DenseData implements Data {
         return this.idxFeatures.get(position);
     }
     
+    public void setLastAsClassIndex() {
+        this.setClassIndex(this.numFeatures() - 1);
+    }
+    
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for(DenseExample ex: this.examples) {
@@ -114,7 +118,7 @@ public class DenseData implements Data {
 
     @Override
     public int numExamples() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return examples.size();
     }
 
     @Override
@@ -134,6 +138,143 @@ public class DenseData implements Data {
             features.add(idxFeat, this.idxFeatures.get(idxFeat));
         }
         return features; 
+    }
+
+    @Override
+    public int getNumClasses() {
+        return this.idxFeatures.get(this.classIndex).categories.length;
+    }
+    
+    /**
+     * Stratifies a set of instances according to its class values if the class
+     * attribute is nominal (so that afterwards a stratified cross-validation
+     * can be performed).
+     *
+     * @param numFolds the number of folds in the cross-validation
+     * @throws UnassignedClassException if the class is not set
+     */
+    public void stratify(int numFolds) {
+
+        if (numFolds <= 1) {
+            throw new IllegalArgumentException(
+                    "Number of folds must be greater than 1");
+        }
+
+        // sort by class
+        int index = 1;
+        int numEx = this.numExamples();
+        int idEx1, idEx2;
+        while (index < numEx) {
+            idEx1 = index - 1;
+            for (int j = index; j < numEx; j++) {
+                idEx2 = j;
+                if (this.getClassEx(idEx1) == this.getClassEx(idEx2)) {
+                    swap(index, j);
+                    index++;
+                }
+            }
+            index++;
+        }
+        stratStep(numFolds);
+    }
+    
+    public void swap(int id1, int id2) {
+        DenseExample ex1 = this.examples.get(id1);
+        DenseExample ex2 = this.examples.get(id2);
+        
+        this.examples.set(id1, ex2);
+        this.examples.set(id2, ex1);
+    }
+    
+     /**
+     * Help function needed for stratification of set.
+     *
+     * @param numFolds the number of folds for the stratification
+     */
+    protected void stratStep(int numFolds) {
+
+        int numEx = this.numExamples();
+        ArrayList<DenseExample> newEx = new ArrayList<>(numEx);        
+        int start = 0, j;
+        
+        // create stratified batch
+        while (newEx.size() < numEx) {
+            j = start;
+            while (j < numEx) {
+                newEx.add(this.examples.get(j));                                
+                j = j + numFolds;
+            }
+            start++;
+        }
+        this.examples = newEx;        
+    }
+    
+    private int getClassEx(int exId) {
+        return (int)this.examples.get(exId).getNumericValue(this.classIndex);
+    }
+
+    @Override
+    public Data trainCV(int numFolds, int numFold) {
+        int numInstForFold, first, offset;
+        DenseData train;
+        int numEx = this.numExamples();
+
+        if (numFolds < 2) {
+            throw new IllegalArgumentException("Number of folds must be at least 2!");
+        }
+        if (numFolds > numEx) {
+            throw new IllegalArgumentException(
+                    "Can't have more folds than instances!");
+        }
+        numInstForFold = numEx / numFolds;
+        if (numFold < numEx % numFolds) {
+            numInstForFold++;
+            offset = numFold;
+        } else {
+            offset = numEx % numFolds;
+        }
+        train = new DenseData("TRAIN_"+this.datasetName, this.listFeatures(), this.classIndex);
+        first = numFold * (numEx / numFolds) + offset;
+        copyInstances(0, train, first);
+        copyInstances(first + numInstForFold, train, numEx - first
+                - numInstForFold);
+
+        return train;
+    }   
+
+    @Override
+    public Data testCV(int numFolds, int numFold) {
+                int numInstForFold, first, offset;
+        DenseData test;
+        int numEx = this.numExamples();
+
+        if (numFolds < 2) {
+            throw new IllegalArgumentException("Number of folds must be at least 2!");
+        }
+        if (numFolds > numEx) {
+            throw new IllegalArgumentException(
+                    "Can't have more folds than instances!");
+        }
+        numInstForFold = numEx / numFolds;
+        if (numFold < numEx % numFolds) {
+            numInstForFold++;
+            offset = numFold;
+        } else {
+            offset = numEx % numFolds;
+        }
+        test = new DenseData("TEST_"+this.datasetName, this.listFeatures(), this.classIndex);
+        first = numFold * (numEx / numFolds) + offset;
+        copyInstances(first, test, numInstForFold);
+        return test;
+    }
+    
+     public void copyInstances(int inic, DenseData data, int end) {        
+        
+        int lastDocId = data.numExamples();
+        for (int i = inic; i < inic + end; i++) {
+            data.examples.add(lastDocId, this.examples.get(i));
+            lastDocId++;
+        }
     }
 
 }

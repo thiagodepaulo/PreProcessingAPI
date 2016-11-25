@@ -293,7 +293,7 @@ public class TCHN_DocTerm extends TextClassifier {
     }
 
     @Override
-    public double[] distributionForInstance(InputPattern instance) throws Exception {
+    public double[] distributionForInstance(InputPattern instance) throws Exception { 
         return this.distributionForInstance(new SparseExample(super.inputPatternToListIndexValue(instance)));
     }
 

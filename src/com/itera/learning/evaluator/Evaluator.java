@@ -6,10 +6,12 @@
 package com.itera.learning.evaluator;
 
 import com.itera.learning.classifier.Classifier;
+import com.itera.structures.Data;
 import com.itera.structures.Example;
 import com.itera.structures.TextData;
 import com.itera.structures.IndexValue;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  *
@@ -19,57 +21,62 @@ public class Evaluator {
 
     public double[][] confusionMatrix;
     public int nClass;
-    public int nDocs;
+    public int nExamples;
     public int correct;
     public int incorrect;
     public int withClass;
+    public int unknow;
     public String[] classNames;
 
-    public Evaluator(TextData data) {
+    public Evaluator(Data data) {
         this.nClass = data.getNumClasses();
         this.incorrect = 0;
         this.correct = 0;
         this.withClass = 0;
-        this.nDocs = data.getNumDocs();
+        this.nExamples = data.numExamples();
         this.confusionMatrix = new double[this.nClass][this.nClass];
         classNames = new String[nClass];
         for (int i = 0; i < nClass; i++) {
-            classNames[i] = data.getClasses().get(i);
+            classNames[i] = data.getFeature(data.getClassIndex()).getFeatureCategorie(i);
         }
     }
 
-    public void evaluateClassifier(Classifier model, TextData testData) throws Exception {
+    public void evaluateClassifier(Classifier model, Data data) throws Exception {
 
-        Example example;
+        Example ex;
+        Iterator<? extends Example> itr = data.itrExamples();
+        while (itr.hasNext()) {
+            ex = itr.next();
 
-        for (int docId : testData.getDocsIds()) {
-            example = testData.getExample(docId);
-            int realClassDoc = testData.getClassDocument(docId);
-            int predClassDoc = model.classifyInstance(example);
-            
-            this.confusionMatrix[realClassDoc][predClassDoc] += 1;
+            int realClassDoc = (int) ex.getClassValue(); // getNumericValue(data.getClassIndex());
+            int predClassDoc = model.classifyInstance(ex);
 
-            if (realClassDoc != predClassDoc) {
-                this.incorrect++;
+            if (predClassDoc == -1) {
+                this.unknow++;
             } else {
-                this.correct++;
+                this.confusionMatrix[realClassDoc][predClassDoc] += 1;
+                this.withClass += 1;
+                if (realClassDoc != predClassDoc) {
+                    this.incorrect++;
+                } else {
+                    this.correct++;
+                }
             }
-            this.withClass += 1;
         }
     }
 
-    public void crossValidateModel(Classifier classifier, TextData data, int numFolds)
+    public void crossValidateModel(Classifier classifier, Data data, int numFolds)
             throws Exception {
         // Make a copy of the data we can reorder
         //data.randomize(random);
         data.stratify(numFolds);
         // Do the folds
-        
+
         for (int i = 0; i < numFolds; i++) {
             System.out.println("cross-validation " + i);
-            TextData train = data.trainCV(numFolds, i);
+            Data train = data.trainCV(numFolds, i);
             classifier.buildClassifier(train);
-            TextData test = data.testCV(numFolds, i);
+            Data test = data.testCV(numFolds, i);
             this.evaluateClassifier(classifier, test);
         }
     }
@@ -85,6 +92,11 @@ public class Evaluator {
 
         return correct;
     }
+    
+    public final double unknow() {
+
+        return this.unknow;
+    }
 
     /**
      * Gets the percentage of instances correctly classified (that is, for which
@@ -93,7 +105,7 @@ public class Evaluator {
      * @return the percent of correctly classified instances (between 0 and 100)
      */
     public final double pctCorrect() {
-        return 100 * correct / (double)withClass;
+        return 100 * correct / (double) (withClass + this.unknow);
     }
 
     /**
@@ -115,7 +127,11 @@ public class Evaluator {
      * 100)
      */
     public final double pctIncorrect() {
-        return 100 * incorrect / (double) withClass;
+        return 100 * incorrect / (double) (withClass + this.unknow);
+    }
+    
+    public final double pctUnknow() {
+        return 100 * this.unknow / (double) (withClass + this.unknow);
     }
 
     public double truePositiveRate(int classIndex) {
@@ -482,11 +498,13 @@ public class Evaluator {
         text.append(correct() + "     " + pctCorrect() + " %\n");
         text.append("Incorrectly Classified Instances   ");
         text.append(incorrect() + "     " + pctIncorrect() + " %\n");
+        text.append("Unknow Classified Instances   ");
+        text.append(unknow() + "     " + pctUnknow() + " %\n");
         text.append("Kappa statistic                    ");
         text.append(kappa() + "\n");
 
         text.append("Total Number of Instances          ");
-        text.append(withClass + "\n");
+        text.append((withClass + this.unknow) + "\n");
         text.append("\n\n");
         return text.toString();
     }

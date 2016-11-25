@@ -27,6 +27,7 @@ import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import static com.itera.util.Tools.join;
+import java.util.Iterator;
 import weka.core.DenseInstance;
 import weka.core.SparseInstance;
 
@@ -131,13 +132,18 @@ public class Conversor {
                 attrs.add(new Attribute(feat.getFeatureName()));
             }
         }
-        //creating instances
+        //creating instances        
         Instances instances = new Instances(data.getDataName(), attrs, numEx);
         instances.setClassIndex(data.getClassIndex());
+        attrs = null;
 
-        while (data.itrExamples().hasNext()) {
-            Example ex = data.itrExamples().next();
+        int r = 0;
+        Iterator<? extends Example> itr = data.itrExamples();
+        while (itr.hasNext()) {
+            //System.out.println(r++); 
+            Example ex = itr.next();
             DenseInstance inst = new DenseInstance(numFeat);
+            inst.setDataset(instances);
             for (int i = 0; i < numFeat; i++) {
                 feat = data.getFeature(i);
                 if (feat.getType() == Feature.FeatureType.NOMINAL) {
@@ -146,7 +152,7 @@ public class Conversor {
                 } else if (feat.getType() == Feature.FeatureType.NUMERIC) {
                     Double value = (Double) ex.getValue(i);
                     inst.setValue(i, value);
-                }                
+                }
             }
             instances.add(inst);
         }

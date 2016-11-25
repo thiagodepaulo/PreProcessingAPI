@@ -15,9 +15,14 @@ public interface Example {
 
     public Object getValue(int index);
     
+    public double getNumericValue(int index);
+    
     public void setValue(int index, double value);
     
-    public void setValue(int index, String value);
+    public void setValue(int index, String value);  
     
+    public int getClassValue();
+    
+    public String getClassNominalValue();
         
 }
